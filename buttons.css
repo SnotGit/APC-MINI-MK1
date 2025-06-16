@@ -2,7 +2,6 @@
     background: #2a2a2a;
     border: 2px solid #444;
     border-radius: 12px;
-    padding: 25px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -11,11 +10,7 @@
     justify-content: center;
     align-items: center;
     gap: 15px;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(26, 26, 26, 0.5);
-    border-radius: 10px;
-    border: 1px solid #333;
+    padding: 30px;
 }
 
 .control-btn {
@@ -69,35 +64,6 @@
     box-shadow: 0 0 6px #5aa3d0;
 }
 
-.shift-btn {
-    background: linear-gradient(145deg, #f39c12, #e67e22);
-    color: #000;
-    border: 3px solid #f39c12;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: 20px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
-}
-
-.shift-btn:hover {
-    background: linear-gradient(145deg, #e67e22, #d35400);
-    border-color: #e67e22;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(243, 156, 18, 0.4);
-}
-
-.shift-btn.active {
-    background: linear-gradient(145deg, #e74c3c, #c0392b);
-    border-color: #e74c3c;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
-    animation: shiftActive 1s ease-in-out infinite alternate;
-}
 
 @keyframes shiftActive {
     0% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }

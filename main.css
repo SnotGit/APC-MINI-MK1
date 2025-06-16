@@ -59,7 +59,7 @@ body {
 
 .header-tab {
     background: transparent;
-    color: #888;
+    color: #e0e0e0;
     border: 2px solid transparent;
     padding: 12px 25px;
     border-radius: 8px;
@@ -109,8 +109,8 @@ body {
 }
 
 .btn.primary:hover {
-    background: #4d798e;
-    border-color: #4d798e;
+    background: #5aa3d0;
+    border-color: #5aa3d0;
 }
 
 /* === CONTENU ONGLETS === */
@@ -160,7 +160,7 @@ body {
     gap: 0;
 }
 
-/* Section Configuration (50% du panel) */
+/* Section Configuration */
 .config-section {
     flex: 1;
     background: #2a2a2a;
@@ -199,7 +199,7 @@ body {
     font-size: 12px;
     text-align: center;
     transition: all 0.2s ease;
-    color: #888;
+    color: #e0e0e0;
     border: none;
     background: transparent;
     font-weight: 500;
@@ -252,7 +252,7 @@ body {
     margin-top: 4px;
     background: #1a1a1a;
     border: 1px solid #4a4a4a;
-    color: #a0a0a0;
+    color: #e0e0e0;
     border-radius: 3px;
 }
 
@@ -282,9 +282,9 @@ body {
 
 .placeholder-text {
     text-align: center;
-    color: #666;
+    color: #e0e0e0;
     padding: 20px;
-    font-size: 11px;
+    font-size: 14px;
 }
 
 /* === ACTIONS === */
@@ -338,11 +338,11 @@ body {
     line-height: 1.3;
 }
 
-.log-system { color: #5aa3d0; }
-.log-in { color: #4a9a4a; }
-.log-out { color: #f39c12; }
-.log-error { color: #e74c3c; }
-.timestamp { color: #666; font-size: 9px; }
+.log-system { color: #5aa3d0; font-size: 11px;}
+.log-in { color: #4a9a4a; font-size: 11px; }
+.log-out { color: #f39c12; font-size: 11px; }
+.log-error { color: #e74c3c; font-size: 11px;}
+.timestamp { color: #e0e0e0; font-size: 11px; }
 
 /* === ONGLET BOUTONS === */
 .buttons-layout {
@@ -354,7 +354,7 @@ body {
 
 .control-buttons-section {
     background: #2a2a2a;
-    border: 2px solid #444;
+    border: 2px solid #e0e0e0;
     border-radius: 12px;
     padding: 25px;
 }
@@ -435,7 +435,7 @@ body {
     padding: 8px 20px;
     border: none;
     background: transparent;
-    color: #888;
+    color: #e0e0e0;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
