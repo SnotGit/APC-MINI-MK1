@@ -172,15 +172,6 @@ body {
     margin-bottom: 20px;
 }
 
-.config-header h3 {
-    color: #5aa3d0;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #3a3a3a;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
 
 .mode-tabs {
     display: flex;
@@ -312,15 +303,6 @@ body {
     min-height: 0;
 }
 
-.console-header h3 {
-    color: #5aa3d0;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #3a3a3a;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
 
 .log-terminal {
     background: #0d0d0d;
