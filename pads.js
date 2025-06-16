@@ -1,4 +1,4 @@
-// pads.js - Gestion de la configuration des pads
+// pads.js - Gestion de la configuration des pads (VERSION CORRIGÉE)
 
 const Pads = {
     selectedPad: null,
@@ -12,37 +12,52 @@ const Pads = {
     
     // Créer la grille de pads
     createPadGrid() {
-        const grid = document.getElementById('pad-grid');
+        const grid = document.getElementById('padGrid');
         if (!grid) {
-            console.error('Grid element not found');
+            console.error('Pad grid element not found (ID: padGrid)');
             return;
         }
         grid.innerHTML = '';
-        
-        // Créer 64 pads (8x8)
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const padIndex = row * 8 + col;
-                const noteNumber = MIDI.rowColToNote(row, col);
-                
-                const pad = document.createElement('div');
-                pad.className = 'pad';
-                pad.dataset.index = padIndex;
-                pad.dataset.note = noteNumber;
-                pad.innerHTML = `${noteNumber}<span class="pad-number">#${padIndex}</span>`;
-                
-                // Événement de clic
-                pad.addEventListener('click', () => this.selectPad(padIndex));
-                
-                grid.appendChild(pad);
-            }
+
+        for (let i = 0; i < 64; i++) {
+            const visualRow = 7 - Math.floor(i / 8); // lignes visuelles de bas (7) à haut (0)
+            const col = i % 8;
+
+            const padIndex = i; // padIndex logique
+            const noteNumber = this.rowColToNote(visualRow, col); // notes MIDI : visuellement bas = row 7
+
+            const pad = document.createElement('div');
+            pad.className = 'pad';
+            pad.dataset.index = padIndex;
+            pad.dataset.note = noteNumber;
+            pad.innerHTML = `${padIndex + 1}`; // Affichage de 1 à 64
+
+            pad.addEventListener('click', () => this.selectPad(padIndex));
+            grid.appendChild(pad);
         }
+
+        console.log('Grille de pads créée avec 1 en bas à gauche ✅');
+    },
+
+    // ✅ NOUVELLE FONCTION : Conversion row/col vers note MIDI
+    rowColToNote(row, col) {
+        // Mapping APC Mini : ligne du bas = notes basses
+        return (7 - row) * 8 + col;
+    },
+    
+    // ✅ NOUVELLE FONCTION : Conversion note MIDI vers pad index
+    noteToPadIndex(note) {
+        const row = 7 - Math.floor(note / 8);
+        const col = note % 8;
+        return row * 8 + col;
     },
     
     // Initialiser les configurations
     initializeConfigs() {
         for (let i = 0; i < 64; i++) {
-            const noteNumber = MIDI.rowColToNote(Math.floor(i / 8), i % 8);
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+            const noteNumber = this.rowColToNote(row, col);
             
             this.padConfigs[i] = {
                 note: noteNumber,
@@ -51,6 +66,8 @@ const Pads = {
                 active: false
             };
         }
+        
+        console.log('Configurations des pads initialisées');
     },
     
     // Sélectionner un pad
@@ -69,7 +86,10 @@ const Pads = {
         // Afficher la configuration
         this.showPadConfig(padIndex);
         
-        App.log(`Pad ${padIndex} sélectionné (Note ${this.padConfigs[padIndex].note})`, 'info');
+        // ✅ CORRECTION : Vérifier que App existe et a la fonction log
+        if (typeof App !== 'undefined' && App.log) {
+            App.log(`Pad ${padIndex} sélectionné (Note ${this.padConfigs[padIndex].note})`, 'info');
+        }
     },
     
     // Afficher la configuration d'un pad
@@ -79,7 +99,7 @@ const Pads = {
         if (!form) return;
         
         form.innerHTML = `
-            <div class="config-row">
+            <div class="form-row">
                 <label>Nom:</label>
                 <input type="text" 
                        id="pad-name" 
@@ -87,14 +107,14 @@ const Pads = {
                        placeholder="Nom du pad">
             </div>
             
-            <div class="config-row">
+            <div class="form-row">
                 <label>Note MIDI:</label>
                 <input type="number" 
                        value="${config.note}" 
                        disabled>
             </div>
             
-            <div class="config-row">
+            <div class="form-row">
                 <label>Couleur:</label>
                 <select id="pad-color" onchange="Pads.updatePadColor(${padIndex}, this.value)">
                     <option value="" ${config.color === '' ? 'selected' : ''}>
@@ -111,25 +131,47 @@ const Pads = {
                     </option>
                 </select>
             </div>
+            
+            <div class="form-row">
+                <label>État:</label>
+                <button onclick="Pads.togglePad(${padIndex})" class="btn">
+                    ${config.active ? 'Désactiver' : 'Activer'}
+                </button>
+            </div>
         `;
         
         // Événement de changement de nom
-        document.getElementById('pad-name').addEventListener('change', (e) => {
-            this.padConfigs[padIndex].name = e.target.value;
-            App.log(`Nom du pad ${padIndex} changé pour "${e.target.value}"`, 'info');
-        });
+        const nameInput = document.getElementById('pad-name');
+        if (nameInput) {
+            nameInput.addEventListener('change', (e) => {
+                this.padConfigs[padIndex].name = e.target.value;
+                if (typeof App !== 'undefined' && App.log) {
+                    App.log(`Nom du pad ${padIndex} changé pour "${e.target.value}"`, 'info');
+                }
+                this.saveConfig();
+            });
+        }
     },
     
     // Mettre à jour la couleur d'un pad
     updatePadColor(padIndex, color) {
         this.padConfigs[padIndex].color = color;
         
-        // Mettre à jour la couleur via MIDI si connecté
-        if (App.isConnected()) {
-            MIDI.sendNoteColor(this.padConfigs[padIndex].note, color);
+        // ✅ CORRECTION : Vérifier que App existe et est connecté
+        if (typeof App !== 'undefined' && App.isConnected && App.isConnected()) {
+            // ✅ CORRECTION : Utiliser la bonne fonction
+            if (typeof MIDI !== 'undefined' && MIDI.setPadColor) {
+                MIDI.setPadColor(this.padConfigs[padIndex].note, color);
+            }
         }
         
-        App.log(`Couleur du pad ${padIndex} changée pour ${color || 'Aucune'}`, 'info');
+        // Mettre à jour l'affichage
+        this.updatePadDisplay(padIndex);
+        this.saveConfig();
+        
+        if (typeof App !== 'undefined' && App.log) {
+            App.log(`Couleur du pad ${padIndex} changée pour ${color || 'Aucune'}`, 'info');
+        }
     },
     
     // Basculer l'état d'un pad
@@ -137,13 +179,17 @@ const Pads = {
         const config = this.padConfigs[padIndex];
         config.active = !config.active;
         
-        // Envoyer la nouvelle couleur via MIDI
-        if (App.isConnected()) {
-            MIDI.sendNoteColor(config.note, config.active ? config.color : '');
+        // ✅ CORRECTION : Vérifier que App existe et est connecté
+        if (typeof App !== 'undefined' && App.isConnected && App.isConnected()) {
+            if (typeof MIDI !== 'undefined' && MIDI.setPadColor) {
+                MIDI.setPadColor(config.note, config.active ? config.color : 'OFF');
+            }
         }
         
         // Mettre à jour l'affichage
         this.updatePadDisplay(padIndex);
+        this.showPadConfig(padIndex); // Rafraîchir le formulaire
+        this.saveConfig();
     },
     
     // Mettre à jour l'affichage d'un pad
@@ -152,12 +198,19 @@ const Pads = {
         const config = this.padConfigs[padIndex];
         
         if (pad) {
+            // Retirer toutes les classes de couleur
+            pad.classList.remove('active', 'assigned-green', 'assigned-red', 'assigned-yellow');
+            
+            if (config.color) {
+                pad.classList.add('assigned-' + config.color.toLowerCase());
+            }
+            
             if (config.active) {
                 pad.classList.add('active');
-                if (config.color) pad.classList.add(config.color.toLowerCase());
-            } else {
-                pad.classList.remove('active', 'green', 'red', 'yellow');
             }
+            
+            // Mettre à jour le tooltip
+            pad.title = `${config.name} (Note ${config.note}) - ${config.color || 'Non assigné'}`;
         }
     },
     
@@ -165,64 +218,135 @@ const Pads = {
     assignGroup(groupIndex, color) {
         const rowSize = 8;
         const halfRow = rowSize / 2;
-        const halfGrid = 32;
         
-        let startPad, endPad;
+        let startRow, endRow, startCol, endCol;
         
         switch(groupIndex) {
-            case 0: // Haut-gauche
-                startPad = 0;
-                endPad = halfRow - 1;
+            case 0: // Haut-gauche (lignes 0-3, colonnes 0-3)
+                startRow = 0; endRow = 3;
+                startCol = 0; endCol = 3;
                 break;
-            case 1: // Haut-droite
-                startPad = halfRow;
-                endPad = rowSize - 1;
+            case 1: // Haut-droite (lignes 0-3, colonnes 4-7)
+                startRow = 0; endRow = 3;
+                startCol = 4; endCol = 7;
                 break;
-            case 2: // Bas-gauche
-                startPad = halfGrid;
-                endPad = halfGrid + halfRow - 1;
+            case 2: // Bas-gauche (lignes 4-7, colonnes 0-3)
+                startRow = 4; endRow = 7;
+                startCol = 0; endCol = 3;
                 break;
-            case 3: // Bas-droite
-                startPad = halfGrid + halfRow;
-                endPad = halfGrid + rowSize - 1;
+            case 3: // Bas-droite (lignes 4-7, colonnes 4-7)
+                startRow = 4; endRow = 7;
+                startCol = 4; endCol = 7;
                 break;
         }
         
-        for (let i = startPad; i <= endPad; i++) {
-            this.padConfigs[i].color = color;
-            if (App.isConnected()) {
-                MIDI.sendNoteColor(this.padConfigs[i].note, color);
+        // Appliquer la couleur au groupe
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+                const padIndex = row * 8 + col;
+                this.padConfigs[padIndex].color = color;
+                this.updatePadDisplay(padIndex);
+                
+                // Envoyer via MIDI si connecté
+                if (typeof App !== 'undefined' && App.isConnected && App.isConnected()) {
+                    if (typeof MIDI !== 'undefined' && MIDI.setPadColor) {
+                        MIDI.setPadColor(this.padConfigs[padIndex].note, color);
+                    }
+                }
             }
         }
         
-        App.log(`Groupe ${groupIndex + 1} configuré avec la couleur ${color}`, 'info');
+        this.saveConfig();
+        
+        if (typeof App !== 'undefined' && App.log) {
+            App.log(`Groupe ${groupIndex + 1} configuré avec la couleur ${color}`, 'info');
+        }
     },
     
     // Gérer la pression d'un pad via MIDI
     handlePadPress(note) {
-        const padIndex = MIDI.noteToPadIndex(note);
+        const padIndex = this.noteToPadIndex(note);
         if (padIndex >= 0 && padIndex < 64) {
             this.togglePad(padIndex);
-            App.log(`Pad ${padIndex} (Note ${note}) pressé`, 'info');
+            if (typeof App !== 'undefined' && App.log) {
+                App.log(`Pad ${padIndex} (Note ${note}) pressé`, 'info');
+            }
         }
     },
     
     // Sauvegarder la configuration
     saveConfig() {
-        return {
-            pads: this.padConfigs
-        };
+        const event = new CustomEvent('config-changed', {
+            detail: { pads: this.padConfigs }
+        });
+        window.dispatchEvent(event);
     },
     
     // Charger une configuration
     loadConfig(config) {
         if (config && config.pads) {
-            this.padConfigs = config.pads;
+            this.padConfigs = { ...this.padConfigs, ...config.pads };
+            
             // Mettre à jour l'affichage de tous les pads
             for (let i = 0; i < 64; i++) {
-                this.updatePadDisplay(i);
+                if (this.padConfigs[i]) {
+                    this.updatePadDisplay(i);
+                }
             }
-            App.log('Configuration des pads chargée', 'success');
+            
+            if (typeof App !== 'undefined' && App.log) {
+                App.log('Configuration des pads chargée', 'info');
+            }
         }
+    },
+    
+    // Réinitialiser tous les pads
+    clearAllPads() {
+        for (let i = 0; i < 64; i++) {
+            this.padConfigs[i].color = '';
+            this.padConfigs[i].active = false;
+            this.updatePadDisplay(i);
+        }
+        
+        // Éteindre tous les pads sur l'APC Mini
+        if (typeof App !== 'undefined' && App.isConnected && App.isConnected()) {
+            if (typeof MIDI !== 'undefined' && MIDI.clearAll) {
+                MIDI.clearAll();
+            }
+        }
+        
+        this.saveConfig();
+        
+        if (typeof App !== 'undefined' && App.log) {
+            App.log('Tous les pads réinitialisés', 'info');
+        }
+    },
+    
+    // Test pattern sur tous les pads
+    testPattern() {
+        const colors = ['GREEN', 'RED', 'YELLOW'];
+        let colorIndex = 0;
+        
+        for (let i = 0; i < 64; i++) {
+            setTimeout(() => {
+                const color = colors[colorIndex % 3];
+                this.padConfigs[i].color = color;
+                this.padConfigs[i].active = true;
+                this.updatePadDisplay(i);
+                
+                if (typeof App !== 'undefined' && App.isConnected && App.isConnected()) {
+                    if (typeof MIDI !== 'undefined' && MIDI.setPadColor) {
+                        MIDI.setPadColor(this.padConfigs[i].note, color);
+                    }
+                }
+                
+                colorIndex++;
+            }, i * 50);
+        }
+        
+        // Arrêter le test après 5 secondes
+        setTimeout(() => {
+            this.clearAllPads();
+        }, 5000);
     }
 };
