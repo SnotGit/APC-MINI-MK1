@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akai APC Mini MK1</title>
+    <!-- CSS séparés -->
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="pads.css">
+    <link rel="stylesheet" href="buttons.css">
+</head>
+<body>
+    <div class="container">
+        <!-- === HEADER avec titre, tabs et boutons === -->
+        <div class="header">
+            <h1>AKAI APC MINI MK1</h1>
+            
+            <!-- Tabs centrés -->
+            <div class="header-tabs">
+                <button class="header-tab active" data-tab="pads" onclick="App.switchTab('pads')">PADS</button>
+                <button class="header-tab" data-tab="buttons" onclick="App.switchTab('buttons')">BOUTONS</button>
+            </div>
+            
+            <div class="header-buttons">
+                <button id="connectBtn" class="btn primary" onclick="App.connectMIDI()">CONNEXION</button>
+                <button class="btn" onclick="App.switchTab('export')">EXPORT</button>
+            </div>
+        </div>
+
+        <!-- === CONTENU DES ONGLETS === -->
+        <div class="tab-content">
+            
+            <!-- ONGLET PADS -->
+            <div id="tab-pads" class="tab-panel active">
+                <div class="pads-layout">
+                    <!-- GRILLE DE PADS (grosse section à gauche) -->
+                    <div class="pads-section">
+                        <div class="pad-grid" id="padGrid">
+                            <!-- Généré par JavaScript - 64 pads (8x8) -->
+                        </div>
+                    </div>
+                    
+                    <!-- PANEL CONFIGURATION (à droite, divisé en 2 sections) -->
+                    <div class="config-panel">
+                        <!-- SECTION CONFIGURATION -->
+                        <div class="config-section">
+                            <div class="config-header">
+                                <h3>Configuration</h3>
+                            </div>
+                            
+                            <!-- Sous-onglets Solo Pad / Groupes -->
+                            <div class="mode-tabs">
+                                <button class="mode-tab active" onclick="App.setMode('individual')">SOLO PAD</button>
+                                <button class="mode-tab" onclick="App.setMode('group')">GROUPES</button>
+                            </div>
+                            
+                            <!-- MODE GROUPES -->
+                            <div id="groupMode" class="config-content" style="display: none;">
+                                <div class="group-buttons">
+                                    <div class="group-btn green" onclick="App.assignGroup(0, 'GREEN')">
+                                        <div>Groupe 1</div>
+                                        <small>Haut-gauche</small>
+                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(0, this.value)">
+                                            <option value="GREEN" selected>Vert</option>
+                                            <option value="RED">Rouge</option>
+                                            <option value="YELLOW">Jaune</option>
+                                        </select>
+                                    </div>
+                                    <div class="group-btn red" onclick="App.assignGroup(1, 'RED')">
+                                        <div>Groupe 2</div>
+                                        <small>Haut-droite</small>
+                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(1, this.value)">
+                                            <option value="GREEN">Vert</option>
+                                            <option value="RED" selected>Rouge</option>
+                                            <option value="YELLOW">Jaune</option>
+                                        </select>
+                                    </div>
+                                    <div class="group-btn green" onclick="App.assignGroup(2, 'GREEN')">
+                                        <div>Groupe 3</div>
+                                        <small>Bas-gauche</small>
+                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(2, this.value)">
+                                            <option value="GREEN" selected>Vert</option>
+                                            <option value="RED">Rouge</option>
+                                            <option value="YELLOW">Jaune</option>
+                                        </select>
+                                    </div>
+                                    <div class="group-btn yellow" onclick="App.assignGroup(3, 'YELLOW')">
+                                        <div>Groupe 4</div>
+                                        <small>Bas-droite</small>
+                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(3, this.value)">
+                                            <option value="GREEN">Vert</option>
+                                            <option value="RED">Rouge</option>
+                                            <option value="YELLOW" selected>Jaune</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MODE SOLO PAD -->
+                            <div id="individualConfig" class="config-content">
+                                <p class="placeholder-text">
+                                    Sélectionnez un pad pour le configurer
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- SECTION CONSOLE (séparée) -->
+                        <div class="console-section">
+                            <div class="console-header">
+                                <h3>Console</h3>
+                            </div>
+                            <div class="log-terminal" id="logTerminal">
+                                <div class="log-entry log-system">
+                                    <span class="timestamp">[Init]</span> Interface APC Mini MK1 chargée
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET BOUTONS -->
+            <div id="tab-buttons" class="tab-panel">
+                <div class="buttons-layout">
+                    
+                    <!-- LIGNE DES 8 BOUTONS + SHIFT (en haut) -->
+                    <div class="control-buttons-section">
+                                               <!-- Toggle Normal/Shift -->
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" onclick="App.setButtonView('normal')">Normal</button>
+                            <button class="toggle-btn" onclick="App.setButtonView('shift')">Shift</button>
+                        </div>
+
+                        <div class="control-buttons-row">
+                            <!-- Les 8 boutons configurables -->
+                            <div class="control-btn" data-button="82" style="border-color: #95a5a6;">82</div>
+                            <div class="control-btn" data-button="83" style="border-color: #95a5a6;">83</div>
+                            <div class="control-btn" data-button="84" style="border-color: #95a5a6;">84</div>
+                            <div class="control-btn" data-button="85" style="border-color: #95a5a6;">85</div>
+                            <div class="control-btn" data-button="86" style="border-color: #95a5a6;">86</div>
+                            <div class="control-btn" data-button="87" style="border-color: #95a5a6;">87</div>
+                            <div class="control-btn" data-button="88" style="border-color: #95a5a6;">88</div>
+                            <div class="control-btn" data-button="89" style="border-color: #95a5a6;">89</div>
+                        </div>
+                        
+
+                    </div>
+
+                    
+                    <!-- 3 COLONNES D'OPTIONS -->
+                    <div class="options-section">
+                        <div class="options-column">
+                            <h3>OPTIONS 1</h3>
+                            <div class="option-btn" data-command="play_stop">Play/Stop</div>
+                            <div class="option-btn" data-command="session_record">Session Record</div>
+                            <div class="option-btn" data-command="overdub">Overdub</div>
+                            <div class="option-btn" data-command="undo">Undo</div>
+                            <div class="option-btn" data-command="redo">Redo</div>
+                            <div class="option-btn" data-command="tap_tempo">Tap Tempo</div>
+                        </div>
+                        
+                        <div class="options-column">
+                            <h3>OPTIONS 2</h3>
+                            <div class="option-btn" data-command="stop_all_clips">Stop All Clips</div>
+                            <div class="option-btn" data-command="capture_midi">Capture MIDI</div>
+                            <div class="option-btn" data-command="metronome">Metronome</div>
+                            <div class="option-btn" data-command="next_scene">Next Scene</div>
+                            <div class="option-btn" data-command="previous_scene">Previous Scene</div>
+                            <div class="option-btn" data-command="launch_selected_scene">Launch Scene</div>
+                        </div>
+                        
+                        <div class="options-column">
+                            <h3>OPTIONS 3</h3>
+                            <div class="option-btn" data-command="new_audio_track">New Audio Track</div>
+                            <div class="option-btn" data-command="new_midi_track">New MIDI Track</div>
+                            <div class="option-btn" data-command="duplicate">Duplicate</div>
+                            <div class="option-btn" data-command="delete">Delete</div>
+                            <div class="option-btn" data-command="automation_arm">Automation Arm</div>
+                            <div class="option-btn" data-command="back_to_arrangement">Back to Arr.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript séparés -->
+    <script src="app.js"></script>
+    <script src="midi.js"></script>
+    <script src="pads.js"></script>
+    <script src="buttons.js"></script>
+    <script src="export.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

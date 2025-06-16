@@ -1,0 +1,235 @@
+/* pads.css - Styles pour la grille de pads */
+
+.pad-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 3px;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #333;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.pad {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+    border: 2px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #999;
+    position: relative;
+    overflow: hidden;
+}
+
+.pad:hover {
+    transform: scale(1.05);
+    border-color: #5aa3d0;
+    box-shadow: 0 0 15px rgba(90, 163, 208, 0.3);
+    color: #5aa3d0;
+}
+
+.pad.selected {
+    border-color: #ff6b6b;
+    background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+    color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+}
+
+/* === ÉTATS DES PADS === */
+
+/* Pad assigné avec une couleur */
+.pad.assigned {
+    border-width: 3px;
+}
+
+/* Pad assigné VERT */
+.pad.assigned-green {
+    border-color: #4a9a4a;
+    background: rgba(74, 154, 74, 0.2);
+    color: #4a9a4a;
+}
+
+.pad.assigned-green.active {
+    background: linear-gradient(145deg, #4a9a4a, #3a8a3a);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(74, 154, 74, 0.6);
+}
+
+/* Pad assigné ROUGE */
+.pad.assigned-red {
+    border-color: #aa4a4a;
+    background: rgba(170, 74, 74, 0.2);
+    color: #aa4a4a;
+}
+
+.pad.assigned-red.active {
+    background: linear-gradient(145deg, #aa4a4a, #9a3a3a);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(170, 74, 74, 0.6);
+}
+
+/* Pad assigné JAUNE */
+.pad.assigned-yellow {
+    border-color: #aaaa4a;
+    background: rgba(170, 170, 74, 0.2);
+    color: #aaaa4a;
+}
+
+.pad.assigned-yellow.active {
+    background: linear-gradient(145deg, #aaaa4a, #9a9a3a);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(170, 170, 74, 0.6);
+}
+
+/* Indicateur d'activité (petit point) */
+.pad.active::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background: #5aa3d0;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #5aa3d0;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* === EFFECTS ET ANIMATIONS === */
+
+/* Animation au survol pour les pads assignés */
+.pad.assigned:hover {
+    transform: scale(1.08);
+    filter: brightness(1.3);
+}
+
+/* Animation de sélection */
+.pad.selected {
+    animation: selectPulse 0.3s ease;
+}
+
+@keyframes selectPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1.1); }
+}
+
+/* Animation de feedback MIDI */
+.pad.midi-feedback {
+    animation: midiFeedback 0.2s ease;
+}
+
+@keyframes midiFeedback {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.8); }
+    100% { transform: scale(1); }
+}
+
+/* === NUMÉROTATION DES PADS === */
+
+/* Affichage du numéro de note MIDI */
+.pad .note-number {
+    font-size: 9px;
+    font-weight: normal;
+    opacity: 0.7;
+}
+
+/* Affichage du nom/label du pad */
+.pad .pad-label {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    font-size: 7px;
+    text-align: center;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* === GROUPES VISUELS === */
+
+/* Indicateurs visuels pour les groupes */
+.pad.group-1 {
+    box-shadow: inset 2px 2px 0 rgba(74, 154, 74, 0.3);
+}
+
+.pad.group-2 {
+    box-shadow: inset 2px 2px 0 rgba(170, 74, 74, 0.3);
+}
+
+.pad.group-3 {
+    box-shadow: inset 2px 2px 0 rgba(74, 154, 74, 0.3);
+}
+
+.pad.group-4 {
+    box-shadow: inset 2px 2px 0 rgba(170, 170, 74, 0.3);
+}
+
+/* === MODE TEST === */
+
+/* Animation de test des couleurs */
+.pad.test-mode {
+    animation: testCycle 3s ease-in-out infinite;
+}
+
+@keyframes testCycle {
+    0% { background: #4a9a4a; }
+    33% { background: #aa4a4a; }
+    66% { background: #aaaa4a; }
+    100% { background: #4a9a4a; }
+}
+
+/* === RESPONSIVENESS === */
+
+@media (max-width: 1200px) {
+    .pad-grid {
+        grid-template-columns: repeat(8, 50px);
+        grid-template-rows: repeat(8, 50px);
+        gap: 2px;
+        padding: 15px;
+    }
+    
+    .pad {
+        width: 50px;
+        height: 50px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    .pad-grid {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+        gap: 2px;
+        padding: 10px;
+    }
+    
+    .pad {
+        width: 40px;
+        height: 40px;
+        font-size: 9px;
+        border-radius: 6px;
+    }
+    
+    .pad .pad-label {
+        font-size: 6px;
+    }
+}
