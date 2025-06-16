@@ -22,7 +22,7 @@ body {
     margin: 0 auto;
 }
 
-/* === HEADER === */
+/* Header */
 .header {
     display: flex;
     justify-content: space-between;
@@ -42,12 +42,6 @@ body {
     letter-spacing: 2px;
 }
 
-.header-buttons {
-    display: flex;
-    gap: 15px;
-}
-
-/* Tabs centrés dans le header */
 .header-tabs {
     display: flex;
     gap: 5px;
@@ -82,6 +76,11 @@ body {
     border-color: #5aa3d0;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 15px;
+}
+
 .btn {
     background: #3a3a3a;
     color: #e0e0e0;
@@ -113,7 +112,7 @@ body {
     border-color: #5aa3d0;
 }
 
-/* === CONTENU ONGLETS === */
+/* Panel structure */
 .tab-content {
     flex: 1;
     overflow: hidden;
@@ -135,13 +134,20 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* === ONGLET PADS === */
 .pads-layout {
     display: flex;
     gap: 30px;
     height: 100%;
 }
 
+.buttons-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    height: 100%;
+}
+
+/* Pads section */
 .pads-section {
     flex: 2.5;
     display: flex;
@@ -160,7 +166,6 @@ body {
     gap: 0;
 }
 
-/* Section Configuration */
 .config-section {
     flex: 1;
     background: #2a2a2a;
@@ -171,7 +176,6 @@ body {
     flex-direction: column;
     margin-bottom: 20px;
 }
-
 
 .mode-tabs {
     display: flex;
@@ -247,23 +251,22 @@ body {
     border-radius: 3px;
 }
 
-/* === GROUPES === */
 .group-btn.green {
-    background: #1a2a1a;
-    border-color: #4a9a4a;
-    color: #4a9a4a;
+    background: #2a2a2a;
+    border-color: #6a6a6a;
+    color: #6a6a6a;
 }
 
 .group-btn.red {
-    background: #2a1a1a;
-    border-color: #aa4a4a;
-    color: #aa4a4a;
+    background: #2a2a2a;
+    border-color: #7a7a7a;
+    color: #7a7a7a;
 }
 
 .group-btn.yellow {
-    background: #2a2a1a;
-    border-color: #aaaa4a;
-    color: #aaaa4a;
+    background: #2a2a2a;
+    border-color: #8a8a8a;
+    color: #8a8a8a;
 }
 
 .group-btn:hover {
@@ -278,20 +281,6 @@ body {
     font-size: 14px;
 }
 
-/* === ACTIONS === */
-.console-actions {
-    margin-top: auto;
-    padding-top: 15px;
-    border-top: 1px solid #3a3a3a;
-}
-
-.action-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-/* === CONSOLE === */
 .console-section {
     flex: 1;
     background: #2a2a2a;
@@ -302,7 +291,6 @@ body {
     flex-direction: column;
     min-height: 0;
 }
-
 
 .log-terminal {
     background: #0d0d0d;
@@ -320,143 +308,64 @@ body {
     line-height: 1.3;
 }
 
-.log-system { color: #5aa3d0; font-size: 11px;}
-.log-in { color: #4a9a4a; font-size: 11px; }
-.log-out { color: #f39c12; font-size: 11px; }
-.log-error { color: #e74c3c; font-size: 11px;}
-.timestamp { color: #e0e0e0; font-size: 11px; }
+.log-system { color: #5aa3d0; }
+.log-info { color: #e0e0e0; }
+.log-success { color: #6a9a6a; }
+.log-warning { color: #f39c12; }
+.log-error { color: #e74c3c; }
+.timestamp { color: #888; }
 
-/* === ONGLET BOUTONS === */
-.buttons-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    height: 100%;
-}
-
+/* Buttons section */
 .control-buttons-section {
     background: #2a2a2a;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #444;
     border-radius: 12px;
     padding: 25px;
-}
-
-.control-buttons-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.control-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid;
-    background: #3a3a3a;
-    color: #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.control-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-.control-btn.selected {
-    background: #5aa3d0;
-    color: #000;
-    transform: scale(1.15);
-    box-shadow: 0 0 20px rgba(90, 163, 208, 0.4);
-}
-
-.shift-btn {
-    background: #f39c12;
-    color: #000;
-    border: 3px solid #f39c12;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: 20px;
-}
-
-.shift-btn:hover {
-    background: #e67e22;
-    border-color: #e67e22;
-    transform: scale(1.05);
-}
-
-.shift-btn.active {
-    background: #e74c3c;
-    border-color: #e74c3c;
-    box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .view-toggle {
     display: flex;
     justify-content: center;
     gap: 5px;
-    background: #1a1a1a;
-    padding: 4px;
-    border-radius: 8px;
+    background: rgba(26, 26, 26, 0.8);
+    padding: 6px;
+    border-radius: 10px;
     border: 1px solid #333;
     width: fit-content;
-    margin: 0 auto;
+    margin: 0 auto 20px auto;
 }
 
 .toggle-btn {
-    padding: 8px 20px;
+    padding: 10px 25px;
     border: none;
     background: transparent;
-    color: #e0e0e0;
-    border-radius: 6px;
+    color: #888;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
-    transition: all 0.2s ease;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
 .toggle-btn.active {
     background: #5aa3d0;
     color: #000;
+    box-shadow: 0 2px 8px rgba(93, 136, 158, 0.3);
 }
 
-.buttons-preview-section {
-    background: #2a2a2a;
-    border: 2px solid #444;
-    border-radius: 12px;
-    padding: 20px;
-}
-
-.buttons-preview-section h3 {
+.toggle-btn:hover:not(.active) {
     color: #5aa3d0;
-    text-align: center;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.preview-grid {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    background: rgba(93, 136, 158, 0.1);
 }
 
 .options-section {
     display: flex;
     gap: 20px;
     flex: 1;
+    min-height: 0;
 }
 
 .options-column {
@@ -465,6 +374,9 @@ body {
     border: 2px solid #444;
     border-radius: 12px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .options-column h3 {
@@ -474,37 +386,12 @@ body {
     font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 600;
     border-bottom: 2px solid #333;
     padding-bottom: 10px;
 }
 
-.option-btn {
-    background: #3a3a3a;
-    color: #e0e0e0;
-    border: 2px solid #555;
-    padding: 12px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    text-align: center;
-    transition: all 0.3s ease;
-    margin-bottom: 8px;
-}
-
-.option-btn:hover {
-    background: #4a4a4a;
-    border-color: #5aa3d0;
-    color: #5aa3d0;
-    transform: translateX(5px);
-}
-
-.option-btn.assigned {
-    border-color: #5aa3d0;
-    background: rgba(93, 136, 158, 0.1);
-    color: #5aa3d0;
-}
-
-/* === FORMS === */
+/* Formulaires */
 .form-row {
     display: flex;
     align-items: center;
@@ -533,45 +420,4 @@ select:focus, input:focus {
     outline: none;
     border-color: #5aa3d0;
     box-shadow: 0 0 5px rgba(93, 136, 158, 0.3);
-}
-
-.color-preview {
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    border: 2px solid #555;
-}
-
-/* === RESPONSIVENESS === */
-@media (max-width: 1200px) {
-    .pads-layout {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .pads-section {
-        flex: none;
-    }
-    
-    .config-panel {
-        flex: none;
-        height: 300px;
-    }
-}
-
-@media (max-width: 900px) {
-    .options-section {
-        flex-direction: column;
-    }
-    
-    .control-buttons-row {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .control-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 12px;
-    }
 }

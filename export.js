@@ -178,8 +178,6 @@ class APC_Mini_Custom(ControlSurface):
             self._setup_mixer()
             self._setup_session()
             self._setup_custom_buttons()
-            
-        self.log_message("APC Mini Custom script loaded successfully")
     
     def _setup_transport(self):
         """Configuration du transport"""
@@ -250,7 +248,6 @@ ${setupMethods}
     
     def disconnect(self):
         """Nettoyage à la déconnexion"""
-        self.log_message("Disconnecting APC Mini Custom")
         super(APC_Mini_Custom, self).disconnect()
 `;
     },
@@ -289,13 +286,6 @@ UTILISATION
 - Les boutons 82-88 sont configurés selon vos préférences
 - Le bouton 89 est le modificateur Shift
 
-CONFIGURATION
--------------
-Pour modifier la configuration, utilisez l'interface web du configurateur
-et générez un nouveau package.
-
-Support : https://github.com/votre-repo/apc-mini-custom
-
 Bon mix !
 `;
     },
@@ -307,8 +297,7 @@ Bon mix !
         
         for (const [buttonId, command] of Object.entries(config.buttons)) {
             if (command) {
-                const label = Buttons.getCommandLabel(command);
-                buttonMapping += `Bouton ${buttonId} : ${label}\n`;
+                buttonMapping += `Bouton ${buttonId} : ${command}\n`;
             } else {
                 buttonMapping += `Bouton ${buttonId} : Non assigné\n`;
             }
@@ -325,12 +314,6 @@ MAPPING DES PADS DANS ABLETON
 =============================
 
 Les pads 0-63 sont automatiquement mappés à la grille de session 8x8.
-Pour mapper des fonctions supplémentaires :
-
-1. Entrez en mode MIDI Map (CMD+M sur Mac, CTRL+M sur Windows)
-2. Cliquez sur le paramètre à contrôler dans Ableton
-3. Appuyez sur le pad correspondant sur votre APC Mini
-4. Sortez du mode MIDI Map
 
 ORGANISATION DES PADS
 =====================
@@ -343,36 +326,6 @@ ORGANISATION DES PADS
    [16][17][18][19][20][21][22][23]  <- Ligne 3
    [ 8][ 9][10][11][12][13][14][15]  <- Ligne 2
    [ 0][ 1][ 2][ 3][ 4][ 5][ 6][ 7]  <- Ligne 1
-
-FADERS (MIDI CC)
-================
-Fader 1: CC 48 (Canal 1)
-Fader 2: CC 49 (Canal 2)
-Fader 3: CC 50 (Canal 3)
-Fader 4: CC 51 (Canal 4)
-Fader 5: CC 52 (Canal 5)
-Fader 6: CC 53 (Canal 6)
-Fader 7: CC 54 (Canal 7)
-Fader 8: CC 55 (Canal 8)
-Fader Master: CC 56
-
-BOUTONS DE SELECTION DE PISTE
-==============================
-Bouton 64: Sélection piste 1
-Bouton 65: Sélection piste 2
-Bouton 66: Sélection piste 3
-Bouton 67: Sélection piste 4
-Bouton 68: Sélection piste 5
-Bouton 69: Sélection piste 6
-Bouton 70: Sélection piste 7
-Bouton 71: Sélection piste 8
-
-ASTUCES
-=======
-- Le script active automatiquement le feedback LED
-- Les pads s'allument en vert quand un clip est présent
-- Les LEDs suivent l'état des clips (lecture, enregistrement, etc.)
-- Utilisez le bouton Shift (89) pour accéder aux fonctions secondaires
 
 Bon mapping !
 `;
@@ -395,8 +348,5 @@ Bon mapping !
 if (typeof JSZip === 'undefined') {
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-    script.onload = () => {
-        App.log('JSZip chargé', 'info');
-    };
     document.head.appendChild(script);
 }

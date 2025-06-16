@@ -1,5 +1,3 @@
-/* pads.css - Styles pour la grille de pads */
-
 .pad-grid {
     display: grid;
     grid-template-columns: repeat(8, 60px);
@@ -40,55 +38,49 @@
 .pad.selected {
     border-color: #5aa3d0;
     color: #5aa3d0;
+    animation: selectPulse 0.3s ease;
 }
 
-/* === ÉTATS DES PADS === */
-
-/* Pad assigné avec une couleur */
 .pad.assigned {
     border-width: 3px;
 }
 
-/* Pad assigné VERT */
 .pad.assigned-green {
-    border-color: #4a9a4a;
-    background: #4a9a4a;
+    border-color: #6a6a6a;
+    background: #6a6a6a;
     color: #fff;
 }
 
 .pad.assigned-green.active {
-    background: linear-gradient(145deg, #4a9a4a, #3a8a3a);
+    background: linear-gradient(145deg, #6a6a6a, #5a5a5a);
     color: #fff;
-    box-shadow: 0 0 15px rgba(74, 154, 74, 0.6);
+    box-shadow: 0 0 15px rgba(106, 106, 106, 0.6);
 }
 
-/* Pad assigné ROUGE */
 .pad.assigned-red {
-    border-color: #aa4a4a;
-    background: #aa4a4a;
+    border-color: #7a7a7a;
+    background: #7a7a7a;
     color: #fff;
 }
 
 .pad.assigned-red.active {
-    background: linear-gradient(145deg, #aa4a4a, #9a3a3a);
+    background: linear-gradient(145deg, #7a7a7a, #6a6a6a);
     color: #fff;
-    box-shadow: 0 0 15px rgba(170, 74, 74, 0.6);
+    box-shadow: 0 0 15px rgba(122, 122, 122, 0.6);
 }
 
-/* Pad assigné JAUNE */
 .pad.assigned-yellow {
-    border-color: #aaaa4a;
-    background: #aaaa4a;
+    border-color: #8a8a8a;
+    background: #8a8a8a;
     color: #fff;
 }
 
 .pad.assigned-yellow.active {
-    background: linear-gradient(145deg, #aaaa4a, #9a9a3a);
+    background: linear-gradient(145deg, #8a8a8a, #7a7a7a);
     color: #fff;
-    box-shadow: 0 0 15px rgba(170, 170, 74, 0.6);
+    box-shadow: 0 0 15px rgba(138, 138, 138, 0.6);
 }
 
-/* Indicateur d'activité (petit point) */
 .pad.active::after {
     content: '';
     position: absolute;
@@ -102,52 +94,21 @@
     animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* === EFFECTS ET ANIMATIONS === */
-
-/* Animation au survol pour les pads assignés */
 .pad.assigned:hover {
     transform: scale(1.08);
     filter: brightness(1.3);
 }
 
-/* Animation de sélection */
-.pad.selected {
-    animation: selectPulse 0.3s ease;
-}
-
-@keyframes selectPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1.1); }
-}
-
-/* Animation de feedback MIDI */
 .pad.midi-feedback {
     animation: midiFeedback 0.2s ease;
 }
 
-@keyframes midiFeedback {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.8); }
-    100% { transform: scale(1); }
-}
-
-/* === NUMÉROTATION DES PADS === */
-
-/* Affichage du numéro de note MIDI */
 .pad .note-number {
     font-size: 9px;
     font-weight: normal;
     opacity: 0.7;
 }
 
-/* Affichage du nom/label du pad */
 .pad .pad-label {
     position: absolute;
     bottom: 2px;
@@ -161,72 +122,47 @@
     text-overflow: ellipsis;
 }
 
-/* === GROUPES VISUELS === */
-
-/* Indicateurs visuels pour les groupes */
 .pad.group-1 {
-    box-shadow: inset 2px 2px 0 rgba(74, 154, 74, 0.3);
+    box-shadow: inset 2px 2px 0 rgba(106, 106, 106, 0.3);
 }
 
 .pad.group-2 {
-    box-shadow: inset 2px 2px 0 rgba(170, 74, 74, 0.3);
+    box-shadow: inset 2px 2px 0 rgba(122, 122, 122, 0.3);
 }
 
 .pad.group-3 {
-    box-shadow: inset 2px 2px 0 rgba(74, 154, 74, 0.3);
+    box-shadow: inset 2px 2px 0 rgba(106, 106, 106, 0.3);
 }
 
 .pad.group-4 {
-    box-shadow: inset 2px 2px 0 rgba(170, 170, 74, 0.3);
+    box-shadow: inset 2px 2px 0 rgba(138, 138, 138, 0.3);
 }
 
-/* === MODE TEST === */
-
-/* Animation de test des couleurs */
 .pad.test-mode {
     animation: testCycle 3s ease-in-out infinite;
 }
 
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes selectPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1.1); }
+}
+
+@keyframes midiFeedback {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.8); }
+    100% { transform: scale(1); }
+}
+
 @keyframes testCycle {
-    0% { background: #4a9a4a; }
-    33% { background: #aa4a4a; }
-    66% { background: #aaaa4a; }
-    100% { background: #4a9a4a; }
-}
-
-/* === RESPONSIVENESS === */
-
-@media (max-width: 1200px) {
-    .pad-grid {
-        grid-template-columns: repeat(8, 50px);
-        grid-template-rows: repeat(8, 50px);
-        gap: 2px;
-        padding: 15px;
-    }
-    
-    .pad {
-        width: 50px;
-        height: 50px;
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 900px) {
-    .pad-grid {
-        grid-template-columns: repeat(8, 40px);
-        grid-template-rows: repeat(8, 40px);
-        gap: 2px;
-        padding: 10px;
-    }
-    
-    .pad {
-        width: 40px;
-        height: 40px;
-        font-size: 9px;
-        border-radius: 6px;
-    }
-    
-    .pad .pad-label {
-        font-size: 6px;
-    }
+    0% { background: #6a6a6a; }
+    33% { background: #7a7a7a; }
+    66% { background: #8a8a8a; }
+    100% { background: #6a6a6a; }
 }
