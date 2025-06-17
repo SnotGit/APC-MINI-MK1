@@ -25,7 +25,7 @@ const Pads = {
         this.setupModeSelector();
         this.isInitialized = true;
         
-        App.log('✅ Module Pads initialisé', 'info');
+        App.log('Module Pads initialisé', 'info');
     },
 
     // ===== CRÉATION GRILLE ===== //
@@ -136,7 +136,7 @@ const Pads = {
         // Feedback MIDI
         this.sendPadFeedback(padNumber);
         
-        App.log(`🎯 Pad ${padNumber} sélectionné`, 'info');
+        App.log(`Pad ${padNumber} sélectionné`, 'info');
     },
 
     deselectPad() {
@@ -246,7 +246,7 @@ const Pads = {
         this.sendPadColor(padNumber, color);
         this.saveConfig();
         
-        App.log(`🎨 Pad ${padNumber} → ${color || 'Aucune'}`, 'info');
+        App.log(`Pad ${padNumber} → ${color || 'Aucune'}`, 'info');
     },
 
     togglePad(padNumber) {
@@ -261,7 +261,7 @@ const Pads = {
             this.showPadConfig(padNumber); // Refresh
         }
         
-        App.log(`🔄 Pad ${padNumber} ${config.active ? 'activé' : 'désactivé'}`, 'info');
+        App.log(`Pad ${padNumber} ${config.active ? 'activé' : 'désactivé'}`, 'info');
     },
 
     resetPad(padNumber) {
@@ -280,7 +280,7 @@ const Pads = {
             this.showPadConfig(padNumber); // Refresh
         }
         
-        App.log(`🔄 Pad ${padNumber} réinitialisé`, 'info');
+        App.log(`Pad ${padNumber} réinitialisé`, 'info');
     },
 
     // ===== AFFICHAGE PADS ===== //
@@ -364,7 +364,7 @@ const Pads = {
         this.updateGroupInterface(groupIndex, color);
         this.saveConfig();
         
-        App.log(`🎨 ${group.name} → ${color} (${group.pads.length} pads)`, 'success');
+        App.log(`${group.name} → ${color} (${group.pads.length} pads)`, 'success');
     },
 
     updateGroupInterface(groupIndex, activeColor) {
@@ -419,7 +419,7 @@ const Pads = {
             this.deselectPad();
         }
         
-        App.log(`🔄 Mode ${mode} activé`, 'info');
+        App.log(`Mode ${mode} activé`, 'info');
     },
 
     // ===== MIDI ===== //
@@ -458,7 +458,7 @@ const Pads = {
             }
         });
         
-        App.log('🔄 Pads synchronisés avec MIDI', 'info');
+        App.log('Pads synchronisés avec MIDI', 'info');
     },
 
     handleMIDIPreview(message) {
@@ -476,7 +476,7 @@ const Pads = {
                 }, 200);
             }
             
-            App.log(`🎹 Pad ${padNumber} pressé (MIDI ${note})`, 'info');
+            App.log(`Pad ${padNumber} pressé (MIDI ${note})`, 'info');
         }
     },
 
@@ -520,7 +520,7 @@ const Pads = {
             this.resetPad(padNumber);
         });
         
-        App.log('🧹 Tous les pads effacés', 'info');
+        App.log('Tous les pads effacés', 'info');
     }
 };
 

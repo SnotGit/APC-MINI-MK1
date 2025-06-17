@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'courier', monospace;
     background: #1a1a1a;
     color: #e0e0e0;
     height: 100vh;
@@ -42,11 +42,14 @@ body {
     color: #5aa3d0;
     text-transform: uppercase;
     letter-spacing: 2px;
+    
 }
 
 .header-buttons {
     display: flex;
     gap: 10px;
+    margin-right: 100px;
+
 }
 
 .header-btn {
@@ -56,9 +59,11 @@ body {
     padding: 12px 20px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     transition: all 0.3s ease;
+    height: 50px;
+    width: 150px;
 }
 
 .header-btn:hover {
@@ -68,8 +73,8 @@ body {
 }
 
 .header-btn.active {
-    background: #5aa3d0;
-    color: #000;
+    background: #3a3a3a;
+    color: #5aa3d0;
     border-color: #5aa3d0;
 }
 
@@ -125,7 +130,7 @@ body {
 
 .placeholder-text {
     text-align: center;
-    color: #888;
+    color: #e0e0e0;
     padding: 40px 20px;
     font-size: 14px;
 }
@@ -142,15 +147,6 @@ body {
     min-height: 200px;
 }
 
-.console-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #5aa3d0;
-}
 
 .console-content {
     flex: 1;
@@ -160,7 +156,7 @@ body {
     padding: 10px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
-    font-size: 10px;
+    font-size: 13px;
     line-height: 1.3;
 }
 
