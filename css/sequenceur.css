@@ -1,0 +1,459 @@
+
+/* ===== LAYOUT SEQUENCER ===== */
+.sequencer-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+/* ===== HEADER SEQUENCER ===== */
+.sequencer-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.scale-selector,
+.octave-selector {
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border: 2px solid #555;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.scale-selector:hover,
+.octave-selector:hover {
+    border-color: #5aa3d0;
+    color: #5aa3d0;
+}
+
+.scale-selector:focus,
+.octave-selector:focus {
+    outline: none;
+    border-color: #5aa3d0;
+    box-shadow: 0 0 5px rgba(90, 163, 208, 0.3);
+}
+
+/* ===== CONTENU SEQUENCER ===== */
+.sequencer-content {
+    display: flex;
+    gap: 30px;
+    height: 100%;
+}
+
+/* ===== SECTION STEPS ===== */
+.steps-section {
+    flex: 1;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.steps-title {
+    color: #5aa3d0;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+/* ===== GRILLE 16 STEPS ===== */
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    flex: 1;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ===== STEP INDIVIDUEL ===== */
+.step {
+    aspect-ratio: 1;
+    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+    border: 2px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #888;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+.step:hover {
+    border-color: #5aa3d0;
+    transform: scale(1.05);
+    color: #5aa3d0;
+}
+
+/* ===== ÉTATS STEPS ===== */
+.step.programmed {
+    background: linear-gradient(145deg, #5a2d2d, #3f1e1e);
+    border-color: #7c4a4a;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(124, 74, 74, 0.3);
+}
+
+.step.programmed:hover {
+    border-color: #a85555;
+    transform: scale(1.08);
+}
+
+.step.playhead {
+    background: linear-gradient(145deg, #ffffff, #e0e0e0);
+    border-color: #ffffff;
+    color: #000000;
+    animation: playheadPulse 0.6s ease infinite alternate;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+.step.playhead.programmed {
+    background: linear-gradient(145deg, #ffdddd, #ffcccc);
+    border-color: #ffffff;
+    color: #000000;
+}
+
+/* ===== INDICATEURS STEP ===== */
+.step-number {
+    font-size: 10px;
+    font-weight: normal;
+    opacity: 0.7;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+}
+
+.step-note {
+    font-size: 8px;
+    opacity: 0.8;
+    position: absolute;
+    bottom: 3px;
+    left: 3px;
+    right: 3px;
+    text-align: center;
+}
+
+/* ===== SECTION CONFIGURATION ===== */
+.config-section {
+    flex: 1;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.config-title {
+    color: #5aa3d0;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+/* ===== CONTRÔLES SEQUENCER ===== */
+.sequencer-controls-panel {
+    background: #333;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-label {
+    color: #5aa3d0;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ===== MODES SEQUENCER ===== */
+.mode-selector {
+    display: flex;
+    gap: 5px;
+    background: #1a1a1a;
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+.mode-option {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    text-align: center;
+    transition: all 0.2s ease;
+    color: #888;
+    border: none;
+    background: transparent;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.mode-option.active {
+    background: #5aa3d0;
+    color: #000;
+    font-weight: 600;
+}
+
+.mode-option:hover:not(.active) {
+    color: #5aa3d0;
+}
+
+/* ===== BOUTONS ACTIONS ===== */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.seq-btn {
+    padding: 10px 15px;
+    border: 2px solid #555;
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.seq-btn:hover {
+    border-color: #5aa3d0;
+    color: #5aa3d0;
+}
+
+.seq-btn.primary {
+    background: #5aa3d0;
+    color: #000;
+    border-color: #5aa3d0;
+}
+
+.seq-btn.primary:hover {
+    background: #4a92b0;
+    border-color: #4a92b0;
+}
+
+.seq-btn.danger {
+    background: #e74c3c;
+    color: #fff;
+    border-color: #e74c3c;
+}
+
+.seq-btn.danger:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}
+
+/* ===== INFORMATIONS GAMME ===== */
+.scale-info {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.scale-info-title {
+    color: #5aa3d0;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.scale-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.scale-note {
+    background: #333;
+    color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.scale-note.root {
+    background: #5aa3d0;
+    color: #000;
+}
+
+/* ===== PLAYHEAD ANIMATION ===== */
+@keyframes playheadPulse {
+    0% { 
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        transform: scale(1);
+    }
+    100% { 
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+        transform: scale(1.02);
+    }
+}
+
+/* ===== FEEDBACK PROGRAMMATION ===== */
+.step.programming {
+    animation: programmingFeedback 0.3s ease;
+}
+
+@keyframes programmingFeedback {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); border-color: #7c4a4a; }
+    100% { transform: scale(1); }
+}
+
+/* ===== ÉTATS GLOBAUX ===== */
+.sequencer-content.playing .steps-grid {
+    pointer-events: none;
+}
+
+.sequencer-content.playing .step:not(.playhead) {
+    opacity: 0.7;
+}
+
+/* ===== RESPONSIVE SEQUENCER ===== */
+@media (max-width: 1200px) {
+    .sequencer-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .steps-grid {
+        max-width: 100%;
+        aspect-ratio: 1;
+    }
+    
+    .sequencer-controls {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sequencer-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .sequencer-controls {
+        justify-content: center;
+    }
+    
+    .scale-selector,
+    .octave-selector {
+        min-width: 100px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .steps-grid {
+        gap: 8px;
+    }
+    
+    .step {
+        font-size: 11px;
+    }
+    
+    .step-number,
+    .step-note {
+        font-size: 8px;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* ===== MAPPING VISUEL ===== */
+.group-mapping {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.mapping-title {
+    color: #5aa3d0;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.mapping-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.mapping-pad {
+    aspect-ratio: 1;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #888;
+}
+
+.mapping-pad.sequencer {
+    background: #5aa3d0;
+    color: #000;
+    font-weight: 600;
+}

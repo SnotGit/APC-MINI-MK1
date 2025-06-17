@@ -3,106 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akai APC Mini MK1</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="pads.css">
+    <title>APC Mini MK1 Configurator</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pads.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/sequencer.css">
+    <link rel="stylesheet" href="css/export.css">
 </head>
 <body>
     <div class="container">
         
-        <!-- 1. Header -->
+        <!-- Header avec titre + boutons navigation -->
         <div class="header">
             <h1>AKAI APC MINI MK1</h1>
             
             <div class="header-buttons">
-                <button id="connectBtn" class="btn primary" onclick="App.connectMIDI()">CONNEXION</button>
-                <button class="btn" onclick="App.switchTab('export')">EXPORT</button>
+                <button class="header-btn active" onclick="App.switchView('pads')">Pad</button>
+                <button class="header-btn" onclick="App.switchView('buttons')">boutons</button>
+                <button class="header-btn" onclick="App.switchView('sequencer')">sequenceur</button>
+                <button class="header-btn" onclick="App.switchView('export')">export</button>
+                <button class="header-btn" onclick="App.switchView('connexion')">connexion</button>
             </div>
         </div>
 
-        <!-- 2. Panel -->
-        <div class="panel">
+        <!-- Layout principal horizontal -->
+        <div class="main-layout">
             
-            <!-- 3. Pads section -->
-            <div id="tab-pads" class="tab-panel active">
-                <div class="pads-layout">
-                    
-                    <div class="pads-section">
-                        <div class="pad-grid" id="padGrid">
-                            <!-- Généré par JavaScript -->
-                        </div>
+            <!-- Container dynamique (gauche) -->
+            <div class="dynamic-container">
+                
+                <!-- Vue Pads -->
+                <div id="view-pads" class="view-content active">
+                    <div class="pad-grid" id="padGrid">
+                        <!-- Généré par pads.js -->
                     </div>
-                    
-                    <div class="config-panel">
-                        <div class="config-section">
-                            
-                            <div class="mode-tabs">
-                                <button class="mode-tab active" onclick="App.setMode('individual')">SOLO PAD</button>
-                                <button class="mode-tab" onclick="App.setMode('group')">GROUPES</button>
-                            </div>
-                            
-                            <div id="groupMode" class="config-content" style="display: none;">
-                                <div class="group-buttons">
-                                    <div class="group-btn green" onclick="App.assignGroup(0, 'GREEN')">
-                                        <div>Groupe 1</div>
-                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(0, this.value)">
-                                            <option value="GREEN" selected>Vert</option>
-                                            <option value="RED">Rouge</option>
-                                            <option value="YELLOW">Jaune</option>
-                                        </select>
-                                    </div>
-                                    <div class="group-btn red" onclick="App.assignGroup(1, 'RED')">
-                                        <div>Groupe 2</div>
-                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(1, this.value)">
-                                            <option value="GREEN">Vert</option>
-                                            <option value="RED" selected>Rouge</option>
-                                            <option value="YELLOW">Jaune</option>
-                                        </select>
-                                    </div>
-                                    <div class="group-btn green" onclick="App.assignGroup(2, 'GREEN')">
-                                        <div>Groupe 3</div>
-                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(2, this.value)">
-                                            <option value="GREEN" selected>Vert</option>
-                                            <option value="RED">Rouge</option>
-                                            <option value="YELLOW">Jaune</option>
-                                        </select>
-                                    </div>
-                                    <div class="group-btn yellow" onclick="App.assignGroup(3, 'YELLOW')">
-                                        <div>Groupe 4</div>
-                                        <select class="group-color-select" onclick="event.stopPropagation()" onchange="App.setGroupColor(3, this.value)">
-                                            <option value="GREEN">Vert</option>
-                                            <option value="RED">Rouge</option>
-                                            <option value="YELLOW" selected>Jaune</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="individualConfig" class="config-content">
-                                <p class="placeholder-text">
-                                    Sélectionnez un pad pour le configurer
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="console-section">
-                            <div class="log-terminal" id="logTerminal">
-                                <div class="log-entry log-system">
-                                    <span class="timestamp">[Init]</span> Interface APC Mini MK1 chargée
-                                </div>
-                            </div>
+                </div>
+                
+                <!-- Vue Boutons -->
+                <div id="view-buttons" class="view-content">
+                    <div class="buttons-content">
+                        <!-- Généré par buttons.js -->
+                    </div>
+                </div>
+                
+                <!-- Vue Sequencer -->
+                <div id="view-sequencer" class="view-content">
+                    <div class="sequencer-content">
+                        <!-- Généré par sequencer.js -->
+                    </div>
+                </div>
+                
+                <!-- Vue Export -->
+                <div id="view-export" class="view-content">
+                    <div class="export-content">
+                        <!-- Généré par export.js -->
+                    </div>
+                </div>
+                
+                <!-- Vue Connexion -->
+                <div id="view-connexion" class="view-content">
+                    <div class="connexion-content">
+                        <div class="midi-status">
+                            <div class="status-dot" id="statusDot"></div>
+                            <span class="status-text" id="statusText">Déconnecté</span>
+                            <button id="connectBtn" class="btn btn-primary">CONNEXION</button>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Panel fixe droite -->
+            <div class="control-panel">
+                
+                <!-- Section config (haut) -->
+                <div class="config-section">
+                    <div id="configContent">
+                        <div class="placeholder-text">
+                            Sélectionnez un élément pour le configurer
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Console (bas) -->
+                <div class="console">
+                    <div class="console-header">
+                        <span>Console</span>
+                        <button class="btn-clear" onclick="App.clearConsole()">✕</button>
+                    </div>
+                    <div class="console-content" id="console">
+                        <div class="log-entry system">
+                            <span class="timestamp">[Init]</span>
+                            Interface APC Mini MK1 chargée
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/midi.js"></script>
+    <script src="js/pads.js"></script>
+    <script src="js/buttons.js"></script>
+    <script src="js/sequencer.js"></script>
+    <script src="js/export.js"></script>
     
-
-    <script src="app.js"></script>
-    <script src="midi.js"></script>
-    <script src="pads.js"></script>
-    <script src="buttons.js"></script>
-    <script src="export.js"></script>
-    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
 </body>
 </html>
