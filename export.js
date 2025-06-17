@@ -1,4 +1,4 @@
-// export.js - Génération du package d'installation
+// export.js - Génération du package d'installation Ableton Live (VERSION SIMPLE)
 
 const Export = {
     // Générer le package complet
@@ -193,10 +193,12 @@ class APC_Mini_Custom(ControlSurface):
             fader = EncoderElement(MIDI_CC_TYPE, 0, 48 + i, Live.MidiMap.MapMode.absolute)
             strip.set_volume_control(fader)
         
-        # Track select buttons (64-71)
+        # Track select buttons (64-71) - sélection + armement
         for i in range(8):
             button = ButtonElement(True, MIDI_NOTE_TYPE, 0, 64 + i)
-            self._mixer.channel_strip(i).set_select_button(button)
+            strip = self._mixer.channel_strip(i)
+            strip.set_select_button(button)
+            strip.set_arm_button(button)  # Armer la piste
     
     def _setup_session(self):
         """Configuration de la session pour les pads"""
@@ -216,7 +218,7 @@ class APC_Mini_Custom(ControlSurface):
                 self._session.scene(row).clip_slot(col).set_launch_button(button)
     
     def _setup_custom_buttons(self):
-        """Configuration des boutons personnalisés 82-88"""${buttonSetups}
+        """Configuration des boutons personnalisés 82-89"""${buttonSetups}
 ${setupMethods}
     
     # Fonctions helper
@@ -281,8 +283,8 @@ INSTALLATION
 UTILISATION
 -----------
 - Les pads 0-63 contrôlent les clips de session (8x8)
-- Les faders 48-56 contrôlent le volume des pistes 1-8
-- Les boutons 64-71 sélectionnent les pistes
+- Les faders 48-56 contrôlent le volume des pistes 1-8 + master
+- Les boutons 64-71 sélectionnent et arment les pistes
 - Les boutons 82-88 sont configurés selon vos préférences
 - Le bouton 89 est le modificateur Shift
 
@@ -292,7 +294,7 @@ Bon mix !
     
     // Générer le guide de mapping
     generateMappingGuide(config) {
-        let buttonMapping = 'CONFIGURATION DES BOUTONS 82-88\n';
+        let buttonMapping = 'CONFIGURATION DES BOUTONS 82-89\n';
         buttonMapping += '================================\n\n';
         
         for (const [buttonId, command] of Object.entries(config.buttons)) {
@@ -326,6 +328,18 @@ ORGANISATION DES PADS
    [16][17][18][19][20][21][22][23]  <- Ligne 3
    [ 8][ 9][10][11][12][13][14][15]  <- Ligne 2
    [ 0][ 1][ 2][ 3][ 4][ 5][ 6][ 7]  <- Ligne 1
+
+BOUTONS DE SÉLECTION/ARMEMENT (64-71)
+=====================================
+
+Bouton 64 : Sélectionner + Armer Piste 1
+Bouton 65 : Sélectionner + Armer Piste 2
+Bouton 66 : Sélectionner + Armer Piste 3
+Bouton 67 : Sélectionner + Armer Piste 4
+Bouton 68 : Sélectionner + Armer Piste 5
+Bouton 69 : Sélectionner + Armer Piste 6
+Bouton 70 : Sélectionner + Armer Piste 7
+Bouton 71 : Sélectionner + Armer Piste 8
 
 Bon mapping !
 `;

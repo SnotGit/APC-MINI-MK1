@@ -1,3 +1,5 @@
+// app.js - Contrôleur principal simple
+
 const App = {
     state: {
         currentTab: 'pads',

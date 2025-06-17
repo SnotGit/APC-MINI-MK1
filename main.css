@@ -42,42 +42,11 @@ body {
     letter-spacing: 2px;
 }
 
-.header-tabs {
-    display: flex;
-    gap: 5px;
-    background: rgba(26, 26, 26, 0.8);
-    padding: 6px;
-    border-radius: 10px;
-    border: 1px solid #333;
-}
-
-.header-tab {
-    background: transparent;
-    color: #e0e0e0;
-    border: 2px solid transparent;
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
-
-.header-tab.active {
-    background: #5aa3d0;
-    color: #000;
-    border-color: #5aa3d0;
-}
-
-.header-tab:hover:not(.active) {
-    color: #5aa3d0;
-    border-color: #5aa3d0;
-}
 
 .header-buttons {
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 15px;
 }
 
@@ -97,7 +66,7 @@ body {
 .btn:hover {
     background: #4a4a4a;
     border-color: #5aa3d0;
-    color: #5aa3d0;
+    color: #8bd3ff;
     transform: translateY(-2px);
 }
 
@@ -108,12 +77,12 @@ body {
 }
 
 .btn.primary:hover {
-    background: #5aa3d0;
-    border-color: #5aa3d0;
+    background: #60ff60;
+    border-color: #60ff60;
 }
 
 /* Panel structure */
-.tab-content {
+.panel {
     flex: 1;
     overflow: hidden;
 }
@@ -215,22 +184,21 @@ body {
     flex: 1;
     background: transparent;
     border-radius: 0;
-    padding: 0;
-    border: none;
-    overflow-y: auto;
+    margin-top: 30px;
+    overflow-y: none;
 }
 
 .group-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 20px;
 }
 
 .group-btn {
     padding: 8px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 14px;
     text-align: center;
     transition: all 0.2s ease;
     border: 1px solid;

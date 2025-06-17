@@ -1,3 +1,5 @@
+// main.js - Point d'entrée simple
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialiser l'application principale
     if (typeof App !== 'undefined') {
