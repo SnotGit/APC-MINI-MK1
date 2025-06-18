@@ -54,7 +54,6 @@ const Sequencer = {
         this.updateInterface();
         this.isInitialized = true;
         
-        App.log('Module Sequencer initialisé', 'success');
     },
 
     // ===== INTERFACE ===== //
@@ -387,7 +386,6 @@ const Sequencer = {
             }
         }, 250);
         
-        App.log('Test playhead démarré', 'info');
     },
 
     stopPlayhead() {
@@ -399,7 +397,6 @@ const Sequencer = {
             step.classList.remove('playhead');
         });
         
-        App.log('Playhead arrêté', 'info');
     },
 
     updatePlayhead() {
@@ -421,7 +418,6 @@ const Sequencer = {
         this.updateInterface();
         this.saveConfig();
         
-        App.log('Tous les steps effacés', 'info');
     },
 
     randomSteps() {
@@ -459,9 +455,7 @@ const Sequencer = {
                 this.sendStepFeedback(index);
             }
         });
-        
-        App.log('Sequencer synchronisé avec MIDI', 'info');
-    },
+            },
 
     updateInterface() {
         this.steps.forEach((_, index) => {

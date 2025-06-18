@@ -1,530 +1,349 @@
-
 const Pads = {
     
-    // ===== ÉTAT ===== //
+    // État minimal
     selectedPad: null,
+    selectedGroup: null,
     currentMode: 'individual', // 'individual' | 'groups'
     padConfigs: {},
+    sequencerEnabled: false,
     isInitialized: false,
     
-    // ===== GROUPES 4x4 ===== //
+    // Définition groupes (selon vos directives)
     groups: {
-        0: { name: 'Groupe 1', range: 'Haut-gauche', color: 'GREEN', pads: [] },
-        1: { name: 'Groupe 2', range: 'Haut-droite', color: 'RED', pads: [] },
-        2: { name: 'Groupe 3', range: 'Step Sequencer', color: null, pads: [] }, // Géré par sequencer
-        3: { name: 'Groupe 4', range: 'Bas-droite', color: 'YELLOW', pads: [] }
+        1: { name: 'Bas-Gauche', pads: [1,2,3,4,9,10,11,12,17,18,19,20,25,26,27,28] },
+        2: { name: 'Haut-Gauche', pads: [33,34,35,36,41,42,43,44,49,50,51,52,57,58,59,60] },
+        3: { name: 'Haut-Droite', pads: [37,38,39,40,45,46,47,48,53,54,55,56,61,62,63,64] },
+        4: { name: 'Bas-Droite', pads: [5,6,7,8,13,14,15,16,21,22,23,24,29,30,31,32] }
     },
 
-    // ===== INITIALISATION ===== //
+    // Initialisation
     init() {
         if (this.isInitialized) return;
         
         this.createPadGrid();
-        this.setupGroupMapping();
-        this.setupEventListeners();
-        this.setupModeSelector();
+        this.initPadConfigs();
+        this.setupEvents();
         this.isInitialized = true;
-        
-        App.log('Module Pads initialisé', 'info');
     },
 
-    // ===== CRÉATION GRILLE ===== //
+    // Générer grille 64 pads
     createPadGrid() {
         const grid = document.getElementById('padGrid');
         if (!grid) return;
         
         grid.innerHTML = '';
         
-        // Créer 64 pads (8x8)
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                // Interface: Pad 1 en bas-gauche, 64 en haut-droite
                 const padNumber = (7 - row) * 8 + col + 1; // 1-64
-                const midiNote = this.padToMIDI(padNumber); // 0-63
                 
                 const pad = document.createElement('div');
                 pad.className = 'pad';
                 pad.dataset.padNumber = padNumber;
-                pad.dataset.midiNote = midiNote;
-                pad.dataset.row = row;
-                pad.dataset.col = col;
-                
-                // Contenu pad
-                pad.innerHTML = `
-                    <div class="pad-number">${padNumber}</div>
-                    <div class="pad-name"></div>
-                `;
-                
-                // Events
-                pad.addEventListener('click', () => this.selectPad(padNumber));
-                pad.addEventListener('mouseenter', () => this.showPadPreview(padNumber));
-                pad.addEventListener('mouseleave', () => this.hidePadPreview());
+                pad.innerHTML = `<div class="pad-number">${padNumber}</div>`;
                 
                 grid.appendChild(pad);
-                
-                // Initialiser config
-                this.initPadConfig(padNumber, midiNote);
             }
         }
     },
 
-    // ===== MAPPING MIDI ===== //
-    padToMIDI(padNumber) {
-        // Pad 1-64 → Note MIDI 0-63
-        const padIndex = padNumber - 1;
-        const visualRow = Math.floor(padIndex / 8);
-        const col = padIndex % 8;
-        return (7 - visualRow) * 8 + col;
+    // Initialiser configs pads
+    initPadConfigs() {
+        for (let i = 1; i <= 64; i++) {
+            this.padConfigs[i] = {
+                color: null,
+                group: this.findPadGroup(i)
+            };
+        }
     },
 
-    midiToPad(midiNote) {
-        // Note MIDI 0-63 → Pad 1-64
-        const midiRow = Math.floor(midiNote / 8);
-        const col = midiNote % 8;
-        const visualRow = 7 - midiRow;
-        return visualRow * 8 + col + 1;
-    },
-
-    // ===== CONFIGURATION PADS ===== //
-    initPadConfig(padNumber, midiNote) {
-        this.padConfigs[padNumber] = {
-            midiNote: midiNote,
-            name: '',
-            color: '',
-            active: false,
-            group: this.getPadGroup(padNumber)
-        };
-    },
-
-    getPadGroup(padNumber) {
-        // Définir les groupes 4x4
-        // Interface: rangées 7-8 (haut), 5-6, 3-4, 1-2 (bas)
-        // Colonnes: 1-4 (gauche), 5-8 (droite)
-        
-        const padIndex = padNumber - 1;
-        const row = Math.floor(padIndex / 8);
-        const col = padIndex % 8;
-        
-        if (row >= 4 && col < 4) return 0; // Groupe 1: Haut-gauche
-        if (row >= 4 && col >= 4) return 1; // Groupe 2: Haut-droite  
-        if (row < 4 && col < 4) return 2; // Groupe 3: Bas-gauche (Sequencer)
-        if (row < 4 && col >= 4) return 3; // Groupe 4: Bas-droite
-        
+    // Trouver groupe d'un pad
+    findPadGroup(padNumber) {
+        for (const [groupId, group] of Object.entries(this.groups)) {
+            if (group.pads.includes(padNumber)) {
+                return parseInt(groupId);
+            }
+        }
         return null;
     },
 
-    // ===== SÉLECTION PADS ===== //
-    selectPad(padNumber) {
-        if (this.selectedPad === padNumber) {
-            this.deselectPad();
-            return;
-        }
-        
-        this.deselectPad();
-        this.selectedPad = padNumber;
-        
-        const pad = this.getPadElement(padNumber);
-        if (pad) {
-            pad.classList.add('selected');
-        }
-        
-        // Afficher configuration en mode individuel
-        if (this.currentMode === 'individual') {
-            this.showPadConfig(padNumber);
-        }
-        
-        // Feedback MIDI
-        this.sendPadFeedback(padNumber);
-        
-        App.log(`Pad ${padNumber} sélectionné`, 'info');
-    },
+    // Event listeners
+    setupEvents() {
+        // Boutons mode Pad/Groupe
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.switchMode(btn.dataset.mode);
+            });
+        });
 
-    deselectPad() {
-        if (this.selectedPad) {
-            const pad = this.getPadElement(this.selectedPad);
+        // Clics sur pads
+        document.addEventListener('click', (e) => {
+            const pad = e.target.closest('.pad');
             if (pad) {
-                pad.classList.remove('selected');
+                const padNumber = parseInt(pad.dataset.padNumber);
+                this.handlePadClick(padNumber);
             }
-            this.selectedPad = null;
+        });
+    },
+
+    // Basculer mode
+    switchMode(mode) {
+        // Convertir les noms des modes HTML vers JS
+        const jsMode = mode === 'pad' ? 'individual' : 'groups';
+        this.currentMode = jsMode;
+        this.selectedPad = null;
+        this.selectedGroup = null;
+        
+        // Mettre à jour boutons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        
+        // Afficher interface selon mode
+        if (jsMode === 'individual') {
+            this.showPadModeInterface();
+        } else if (jsMode === 'groups') {
+            this.showGroupModeInterface();
+        }
+        
+        this.updatePadVisuals();
+    },
+
+    // Clic sur pad
+    handlePadClick(padNumber) {
+        if (this.currentMode === 'individual') {
+            this.selectPad(padNumber);
+        }
+        // En mode groupe, les clics sur pads ne font rien
+    },
+
+    // Sélectionner pad individuel
+    selectPad(padNumber) {
+        this.selectedPad = padNumber;
+        this.updatePadInfo(padNumber);
+        this.updatePadVisuals();
+    },
+
+    // Sélectionner groupe
+    selectGroup(groupId) {
+        this.selectedGroup = groupId;
+        
+        // Mettre à jour boutons groupes
+        document.querySelectorAll('.group-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.group) === groupId);
+        });
+        
+        this.updateSequencerOption();
+        this.updatePadVisuals();
+    },
+
+    // Mettre à jour info pad sélectionné
+    updatePadInfo(padNumber) {
+        const infoContent = document.querySelector('.info-content');
+        if (infoContent && padNumber) {
+            const midiNote = padNumber - 1;
+            infoContent.textContent = `PAD ${padNumber} / NOTE ${midiNote}`;
         }
     },
 
-    deselectAll() {
-        this.deselectPad();
+    // Appliquer couleur en mode PAD
+    applyPadColor(color) {
+        if (!this.selectedPad) return;
+        
+        this.padConfigs[this.selectedPad].color = color;
+        this.updatePadVisual(this.selectedPad);
+        this.sendMIDIColor(this.selectedPad, color);
+        this.saveConfig();
     },
 
-    // ===== CONFIGURATION INDIVIDUELLE ===== //
-    showPadConfig(padNumber) {
-        const config = this.padConfigs[padNumber];
-        const container = document.getElementById('individual-config');
-        if (!container) return;
+    // Appliquer couleur en mode GROUPE
+    applyGroupColor(color) {
+        if (!this.selectedGroup) return;
         
-        container.innerHTML = `
-            <div class="config-header">
-                <h3>Configuration Pad ${padNumber}</h3>
-                <small>Note MIDI: ${config.midiNote} | Groupe: ${config.group + 1}</small>
+        const group = this.groups[this.selectedGroup];
+        
+        group.pads.forEach(padNumber => {
+            // Respecter limitation séquenceur pour groupe 3
+            if (this.selectedGroup === 3 && this.sequencerEnabled) {
+                const controls = [37,38,39,40]; // 4 premiers = contrôles
+                if (controls.includes(padNumber)) return;
+            }
+            
+            this.padConfigs[padNumber].color = color;
+            this.updatePadVisual(padNumber);
+            this.sendMIDIColor(padNumber, color);
+        });
+        
+        this.saveConfig();
+    },
+
+    // Interface mode PADS
+    showPadModeInterface() {
+        const configPanel = document.getElementById('configContent');
+        if (!configPanel) return;
+
+        configPanel.innerHTML = `
+            <div class="info-section">
+                <div class="info-title">INFORMATIONS PAD SELECTED</div>
+                <div class="info-content">NUMERO PAD / NOTE PAD</div>
             </div>
             
-            <div class="form-group">
-                <label>Nom du pad:</label>
-                <input type="text" 
-                       id="pad-name-input" 
-                       value="${config.name}" 
-                       placeholder="Ex: Kick, Snare..."
-                       maxlength="12">
+            <div class="color-section">
+                <button class="color-btn green" onclick="Pads.applyPadColor('green')"></button>
+                <button class="color-btn yellow" onclick="Pads.applyPadColor('yellow')"></button>
+                <button class="color-btn red" onclick="Pads.applyPadColor('red')"></button>
+                <button class="color-btn clear" onclick="Pads.applyPadColor(null)">CLEAR</button>
+            </div>
+        `;
+    },
+
+    // Interface mode GROUPES
+    showGroupModeInterface() {
+        const configPanel = document.getElementById('configContent');
+        if (!configPanel) return;
+
+        configPanel.innerHTML = `
+            <div class="groups-section">
+                <button class="group-btn" data-group="1" onclick="Pads.selectGroup(1)">GROUPE 1</button>
+                <button class="group-btn" data-group="2" onclick="Pads.selectGroup(2)">GROUPE 2</button>
+                <button class="group-btn" data-group="3" onclick="Pads.selectGroup(3)">GROUPE 3</button>
+                <button class="group-btn" data-group="4" onclick="Pads.selectGroup(4)">GROUPE 4</button>
             </div>
             
-            <div class="form-group">
-                <label>Couleur:</label>
-                <div class="color-selector">
-                    <button class="color-option ${config.color === '' ? 'active' : ''}" 
-                            data-color="" title="Aucune (contrôle Ableton)">
-                        <span class="color-preview none"></span>
-                        Aucune
-                    </button>
-                    <button class="color-option ${config.color === 'GREEN' ? 'active' : ''}" 
-                            data-color="GREEN" title="Vert">
-                        <span class="color-preview green"></span>
-                        Vert
-                    </button>
-                    <button class="color-option ${config.color === 'RED' ? 'active' : ''}" 
-                            data-color="RED" title="Rouge">
-                        <span class="color-preview red"></span>
-                        Rouge
-                    </button>
-                    <button class="color-option ${config.color === 'YELLOW' ? 'active' : ''}" 
-                            data-color="YELLOW" title="Jaune">
-                        <span class="color-preview yellow"></span>
-                        Jaune
-                    </button>
-                </div>
+            <div class="color-section">
+                <button class="color-btn green" onclick="Pads.applyGroupColor('green')"></button>
+                <button class="color-btn yellow" onclick="Pads.applyGroupColor('yellow')"></button>
+                <button class="color-btn red" onclick="Pads.applyGroupColor('red')"></button>
+                <button class="color-btn clear" onclick="Pads.applyGroupColor(null)">CLEAR</button>
             </div>
             
-            <div class="form-actions">
-                <button class="btn btn-secondary" onclick="Pads.resetPad(${padNumber})">
-                    Réinitialiser
-                </button>
-                <button class="btn ${config.active ? 'btn-primary' : ''}" 
-                        onclick="Pads.togglePad(${padNumber})">
-                    ${config.active ? 'Désactiver' : 'Activer'}
-                </button>
+            <div class="sequencer-section">
+                <label class="sequencer-toggle">
+                    <input type="checkbox" ${this.sequencerEnabled ? 'checked' : ''} onchange="Pads.toggleSequencer(this.checked)">
+                    ACTIVER SEQUENCEUR
+                </label>
             </div>
         `;
         
-        // Event listeners
-        this.setupPadConfigEvents(padNumber);
+        this.updateSequencerOption();
     },
 
-    setupPadConfigEvents(padNumber) {
-        // Nom du pad
-        const nameInput = document.getElementById('pad-name-input');
-        if (nameInput) {
-            nameInput.addEventListener('input', (e) => {
-                this.updatePadName(padNumber, e.target.value);
-            });
-        }
+    // Mettre à jour option séquenceur selon groupe sélectionné
+    updateSequencerOption() {
+        const checkbox = document.querySelector('.sequencer-toggle input');
+        const label = document.querySelector('.sequencer-toggle');
         
-        // Couleurs
-        document.querySelectorAll('.color-option').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const color = btn.dataset.color;
-                this.updatePadColor(padNumber, color);
-                this.showPadConfig(padNumber); // Refresh
-            });
-        });
-    },
-
-    updatePadName(padNumber, name) {
-        this.padConfigs[padNumber].name = name.trim();
-        this.updatePadDisplay(padNumber);
-        this.saveConfig();
-    },
-
-    updatePadColor(padNumber, color) {
-        this.padConfigs[padNumber].color = color;
-        this.updatePadDisplay(padNumber);
-        this.sendPadColor(padNumber, color);
-        this.saveConfig();
-        
-        App.log(`Pad ${padNumber} → ${color || 'Aucune'}`, 'info');
-    },
-
-    togglePad(padNumber) {
-        const config = this.padConfigs[padNumber];
-        config.active = !config.active;
-        
-        this.updatePadDisplay(padNumber);
-        this.sendPadColor(padNumber, config.active ? config.color : '');
-        this.saveConfig();
-        
-        if (this.selectedPad === padNumber) {
-            this.showPadConfig(padNumber); // Refresh
-        }
-        
-        App.log(`Pad ${padNumber} ${config.active ? 'activé' : 'désactivé'}`, 'info');
-    },
-
-    resetPad(padNumber) {
-        this.padConfigs[padNumber] = {
-            ...this.padConfigs[padNumber],
-            name: '',
-            color: '',
-            active: false
-        };
-        
-        this.updatePadDisplay(padNumber);
-        this.sendPadColor(padNumber, '');
-        this.saveConfig();
-        
-        if (this.selectedPad === padNumber) {
-            this.showPadConfig(padNumber); // Refresh
-        }
-        
-        App.log(`Pad ${padNumber} réinitialisé`, 'info');
-    },
-
-    // ===== AFFICHAGE PADS ===== //
-    updatePadDisplay(padNumber) {
-        const pad = this.getPadElement(padNumber);
-        const config = this.padConfigs[padNumber];
-        if (!pad) return;
-        
-        // Reset classes
-        pad.classList.remove('color-green', 'color-red', 'color-yellow', 'active', 'assigned');
-        
-        // Couleur
-        if (config.color) {
-            pad.classList.add(`color-${config.color.toLowerCase()}`, 'assigned');
-        }
-        
-        // État actif
-        if (config.active) {
-            pad.classList.add('active');
-        }
-        
-        // Nom
-        const nameEl = pad.querySelector('.pad-name');
-        if (nameEl) {
-            nameEl.textContent = config.name;
-        }
-        
-        // Tooltip
-        pad.title = `Pad ${padNumber} | MIDI: ${config.midiNote} | ${config.name || 'Sans nom'} | ${config.color || 'Aucune couleur'}`;
-    },
-
-    // ===== GESTION GROUPES ===== //
-    setupGroupMapping() {
-        // Calculer les pads pour chaque groupe
-        for (let padNumber = 1; padNumber <= 64; padNumber++) {
-            const group = this.getPadGroup(padNumber);
-            if (group !== null) {
-                this.groups[group].pads.push(padNumber);
-            }
-        }
-        
-        this.setupGroupsInterface();
-    },
-
-    setupGroupsInterface() {
-        // Event listeners pour les groupes
-        document.querySelectorAll('.group-card').forEach(card => {
-            const groupIndex = parseInt(card.dataset.group);
-            
-            // Sélecteurs de couleur (sauf groupe 3)
-            if (groupIndex !== 2) {
-                card.querySelectorAll('.color-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const color = btn.dataset.color;
-                        this.assignGroup(groupIndex, color);
-                    });
-                });
-            }
-        });
-    },
-
-    assignGroup(groupIndex, color) {
-        if (groupIndex === 2) return; // Groupe 3 géré par sequencer
-        
-        const group = this.groups[groupIndex];
-        group.color = color;
-        
-        let count = 0;
-        group.pads.forEach(padNumber => {
-            this.padConfigs[padNumber].color = color;
-            this.updatePadDisplay(padNumber);
-            
-            // Feedback MIDI progressif
-            setTimeout(() => {
-                this.sendPadColor(padNumber, color);
-            }, count * 20);
-            count++;
-        });
-        
-        this.updateGroupInterface(groupIndex, color);
-        this.saveConfig();
-        
-        App.log(`${group.name} → ${color} (${group.pads.length} pads)`, 'success');
-    },
-
-    updateGroupInterface(groupIndex, activeColor) {
-        const card = document.querySelector(`[data-group="${groupIndex}"]`);
-        if (!card) return;
-        
-        card.querySelectorAll('.color-btn').forEach(btn => {
-            if (btn.dataset.color === activeColor) {
-                btn.classList.add('active');
+        if (checkbox && label) {
+            if (this.selectedGroup === 2 || this.selectedGroup === 3) {
+                label.style.opacity = '1';
+                checkbox.disabled = false;
             } else {
-                btn.classList.remove('active');
+                label.style.opacity = '0.5';
+                checkbox.disabled = true;
             }
-        });
+        }
     },
 
-    // ===== MODE SELECTOR ===== //
-    setupModeSelector() {
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.dataset.mode;
-                this.switchMode(mode);
+    // Toggle séquenceur
+    toggleSequencer(enabled) {
+        this.sequencerEnabled = enabled;
+        
+        if (enabled) {
+            // 4 premiers pads groupe 3 = contrôles (jaune)
+            [37,38,39,40].forEach(pad => {
+                this.padConfigs[pad].color = 'yellow';
+                this.updatePadVisual(pad);
+                this.sendMIDIColor(pad, 'yellow');
             });
-        });
-    },
-
-    switchMode(mode) {
-        this.currentMode = mode;
-        
-        // UI mode buttons
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            if (btn.dataset.mode === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        
-        // Sections
-        const individualConfig = document.getElementById('individual-config');
-        const groupsConfig = document.getElementById('groups-config');
-        
-        if (mode === 'individual') {
-            if (individualConfig) individualConfig.classList.remove('hidden');
-            if (groupsConfig) groupsConfig.classList.add('hidden');
-            
-            // Désélectionner pour forcer re-sélection
-            this.deselectPad();
         } else {
-            if (individualConfig) individualConfig.classList.add('hidden');
-            if (groupsConfig) groupsConfig.classList.remove('hidden');
-            
-            this.deselectPad();
+            // Restaurer groupe 3 complet
+            this.groups[3].pads.forEach(pad => {
+                this.updatePadVisual(pad);
+                this.sendMIDIColor(pad, this.padConfigs[pad].color);
+            });
         }
         
-        App.log(`Mode ${mode} activé`, 'info');
+        this.saveConfig();
     },
 
-    // ===== MIDI ===== //
-    sendPadColor(padNumber, color) {
+    // Mettre à jour visuel pad
+    updatePadVisual(padNumber) {
+        const pad = document.querySelector(`[data-pad-number="${padNumber}"]`);
+        if (!pad) return;
+
+        // Reset classes
+        pad.classList.remove('selected', 'group-highlight', 'color-green', 'color-red', 'color-yellow');
+
+        // Sélection pad individuel (mode PADS)
+        if (this.currentMode === 'individual' && this.selectedPad === padNumber) {
+            pad.classList.add('selected');
+        }
+        
+        // Surlignage groupe (mode GROUPES)
+        if (this.currentMode === 'groups' && this.selectedGroup && this.findPadGroup(padNumber) === this.selectedGroup) {
+            pad.classList.add('group-highlight');
+        }
+
+        // Couleur
+        const color = this.padConfigs[padNumber].color;
+        if (color) {
+            pad.classList.add(`color-${color}`);
+        }
+    },
+
+    // Mettre à jour tous les visuels
+    updatePadVisuals() {
+        for (let i = 1; i <= 64; i++) {
+            this.updatePadVisual(i);
+        }
+    },
+
+    // Envoyer couleur MIDI
+    sendMIDIColor(padNumber, color) {
         if (!App.isConnected() || typeof MIDI === 'undefined') return;
         
-        const config = this.padConfigs[padNumber];
-        const midiNote = config.midiNote;
-        
-        MIDI.setPadColor(midiNote, color || 'OFF');
+        const midiNote = padNumber - 1; // Pad 1-64 → MIDI 0-63
+        const colorMap = { green: 'GREEN', red: 'RED', yellow: 'YELLOW' };
+        MIDI.setPadColor(midiNote, colorMap[color] || 'OFF');
     },
 
-    sendPadFeedback(padNumber) {
-        if (!App.isConnected()) return;
-        
-        const config = this.padConfigs[padNumber];
-        if (config.color) {
-            this.sendPadColor(padNumber, config.color);
-            
-            // Blink rapide pour feedback
-            setTimeout(() => {
-                this.sendPadColor(padNumber, '');
-            }, 100);
-            setTimeout(() => {
-                this.sendPadColor(padNumber, config.color);
-            }, 200);
-        }
-    },
-
-    syncToMIDI() {
-        // Synchroniser tous les pads actifs
-        Object.keys(this.padConfigs).forEach(padNumber => {
-            const config = this.padConfigs[padNumber];
-            if (config.active && config.color) {
-                this.sendPadColor(padNumber, config.color);
-            }
-        });
-        
-        App.log('Pads synchronisés avec MIDI', 'info');
-    },
-
-    handleMIDIPreview(message) {
-        const { status, note, velocity } = message;
-        
-        if (status === 0x90 && velocity > 0) { // Note On
-            const padNumber = this.midiToPad(note);
-            
-            // Feedback visuel seulement
-            const pad = this.getPadElement(padNumber);
-            if (pad) {
-                pad.classList.add('midi-feedback');
-                setTimeout(() => {
-                    pad.classList.remove('midi-feedback');
-                }, 200);
-            }
-            
-            App.log(`Pad ${padNumber} pressé (MIDI ${note})`, 'info');
-        }
-    },
-
-    // ===== PREVIEW ===== //
-    showPadPreview(padNumber) {
-        const pad = this.getPadElement(padNumber);
-        if (pad && !pad.classList.contains('selected')) {
-            pad.style.borderColor = '#5aa3d0';
-        }
-    },
-
-    hidePadPreview() {
-        document.querySelectorAll('.pad:not(.selected)').forEach(pad => {
-            pad.style.borderColor = '';
-        });
-    },
-
-    // ===== CONFIGURATION ===== //
+    // Sauvegarde
     saveConfig() {
-        App.updateConfig('pads', this.padConfigs);
-    },
-
-    loadConfig(config) {
-        if (config.pads) {
-            this.padConfigs = { ...this.padConfigs, ...config.pads };
-            
-            // Mettre à jour affichage
-            Object.keys(this.padConfigs).forEach(padNumber => {
-                this.updatePadDisplay(padNumber);
-            });
-        }
-    },
-
-    // ===== UTILITAIRES ===== //
-    getPadElement(padNumber) {
-        return document.querySelector(`[data-pad-number="${padNumber}"]`);
-    },
-
-    clearAll() {
-        Object.keys(this.padConfigs).forEach(padNumber => {
-            this.resetPad(padNumber);
+        App.updateConfig('pads', {
+            padConfigs: this.padConfigs,
+            sequencerEnabled: this.sequencerEnabled
         });
+    },
+
+    // Chargement
+    loadConfig(config) {
+        if (config.pads?.padConfigs) {
+            this.padConfigs = { ...this.padConfigs, ...config.pads.padConfigs };
+        }
+        if (config.pads?.sequencerEnabled !== undefined) {
+            this.sequencerEnabled = config.pads.sequencerEnabled;
+        }
         
-        App.log('Tous les pads effacés', 'info');
+        this.updatePadVisuals();
+    },
+
+    // API pour autres modules
+    deselectAll() {
+        this.selectedPad = null;
+        this.selectedGroup = null;
+        
+        // Reset interface selon mode
+        if (this.currentMode === 'individual') {
+            this.showPadModeInterface();
+        } else if (this.currentMode === 'groups') {
+            this.showGroupModeInterface();
+        }
+        
+        this.updatePadVisuals();
     }
 };
 
-// ===== EVENT LISTENERS ===== //
+// Event listener global
 window.addEventListener('config-changed', (event) => {
     if (event.detail.pads) {
         Pads.loadConfig(event.detail);
