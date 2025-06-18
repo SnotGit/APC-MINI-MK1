@@ -1,44 +1,41 @@
-
 const Buttons = {
     
     // ===== ÉTAT ===== //
-    currentMode: 'normal', // 'normal' | 'shift'
     selectedButton: null,
+    shiftMode: false,
     buttonConfigs: {},
     isInitialized: false,
     
-    // ===== ACTIONS DISPONIBLES ===== //
+    // ===== 16 COULEURS FLASHY ===== //
+    colors: [
+        '#ce0000', '#00ce00', '#0000ce', '#ce00ce', 
+        '#cece00', '#00cece', '#ff6600', '#6600ff',
+        '#ff0066', '#66ff00', '#0066ff', '#ff6666',
+        '#66ff66', '#6666ff', '#ffff66', '#ff66ff'
+    ],
+    
+    // ===== 16 ACTIONS ===== //
     actions: {
-        transport: {
-            title: 'Transport',
-            items: {
-                'play_stop': 'Play / Stop',
-                'stop': 'Stop',
-                'record': 'Record',
-                'metronome_on': 'Metronome ON',
-                'metronome_off': 'Metronome OFF'
-            }
-        },
-        session: {
-            title: 'Session',
-            items: {
-                'new_clip_8bars': 'New Clip 8 bars',
-                'play_clip': 'Play Clip',
-                'stop_clip': 'Stop Clip', 
-                'launch_scene_1': 'Launch Scene 1',
-                'stop_all': 'Stop All Clips'
-            }
-        },
-        devices: {
-            title: 'Devices',
-            items: {
-                'loop_auto': 'Loop Auto Record',
-                'overdub_loop': 'Overdub Loop',
-                'tempo_up_20': 'Tempo +20',
-                'tempo_down_20': 'Tempo -20',
-                'quantize_clip': 'Quantize Clip'
-            }
-        }
+        normal: [
+            { id: 'play_stop', name: 'Play/Stop' },
+            { id: 'record', name: 'Record' },
+            { id: 'metronome_on', name: 'Metronome ON' },
+            { id: 'new_clip_8bars', name: 'New Clip 8 bars' },
+            { id: 'play_clip', name: 'Play Clip' },
+            { id: 'loop_auto', name: 'Loop Auto' },
+            { id: 'tempo_up_20', name: 'Tempo +20' },
+            { id: 'launch_scene_1', name: 'Launch Scene 1' }
+        ],
+        shift: [
+            { id: 'stop', name: 'Stop' },
+            { id: 'stop_alt', name: 'Stop' },
+            { id: 'metronome_off', name: 'Metronome OFF' },
+            { id: 'quantize_clip', name: 'Quantize Clip' },
+            { id: 'stop_clip', name: 'Stop Clip' },
+            { id: 'overdub_loop', name: 'Overdub Loop' },
+            { id: 'tempo_down_20', name: 'Tempo -20' },
+            { id: 'stop_all', name: 'Stop All' }
+        ]
     },
 
     // ===== INITIALISATION ===== //
@@ -48,30 +45,19 @@ const Buttons = {
         this.initButtonConfigs();
         this.createInterface();
         this.setupEventListeners();
-        this.updateInterface();
         this.isInitialized = true;
         
-        App.log('✅ Module Buttons initialisé', 'info');
+        App.log('Module Buttons initialisé', 'success');
     },
 
     initButtonConfigs() {
-        // Configuration par défaut des 8 boutons
         for (let buttonId = 82; buttonId <= 89; buttonId++) {
             this.buttonConfigs[buttonId] = {
-                normal: '',
-                shift: ''
+                normal: null,
+                shift: null,
+                color: null
             };
         }
-        
-        // Configuration par défaut
-        this.buttonConfigs[82] = { normal: 'play_stop', shift: 'stop' };
-        this.buttonConfigs[83] = { normal: 'record', shift: 'stop' };
-        this.buttonConfigs[84] = { normal: 'metronome_on', shift: 'metronome_off' };
-        this.buttonConfigs[85] = { normal: 'new_clip_8bars', shift: 'quantize_clip' };
-        this.buttonConfigs[86] = { normal: 'play_clip', shift: 'stop_clip' };
-        this.buttonConfigs[87] = { normal: 'loop_auto', shift: 'overdub_loop' };
-        this.buttonConfigs[88] = { normal: 'tempo_up_20', shift: 'tempo_down_20' };
-        this.buttonConfigs[89] = { normal: 'launch_scene_1', shift: 'stop_all' };
     },
 
     // ===== INTERFACE ===== //
@@ -80,329 +66,235 @@ const Buttons = {
         if (!container) return;
         
         container.innerHTML = `
-            <!-- Section Boutons APC -->
-            <div class="apc-buttons-section">
-                <h3 class="apc-buttons-title">Boutons APC Mini (82-89)</h3>
-                <div class="apc-buttons-grid" id="apcButtonsGrid">
-                    <!-- Généré par createAPCButtons() -->
-                </div>
-            </div>
-            
-            <!-- Section Actions -->
-            <div class="actions-section">
-                <h3 class="actions-title">Actions Disponibles</h3>
-                <div class="actions-grid" id="actionsGrid">
-                    <!-- Généré par createActionsGrid() -->
+            <div class="buttons-interface">
+                <!-- 8 Boutons APC -->
+                <div class="apc-buttons-row">
+                    ${this.createAPCButtons()}
+                    <button class="shift-toggle" id="shiftToggle" onclick="Buttons.toggleShift()">
+                        SHIFT
+                    </button>
                 </div>
                 
-                <div class="instructions">
-                    <div class="instructions-title">Instructions</div>
-                    <ul class="instructions-list">
-                        <li>Sélectionnez un bouton APC (82-89)</li>
-                        <li>Choisissez une action dans les colonnes</li>
-                        <li>Toggle Normal/Shift pour 16 actions</li>
-                        <li>Configuration sauvegardée automatiquement</li>
-                    </ul>
+                <!-- 2 Colonnes Actions -->
+                <div class="actions-columns">
+                    <div class="actions-column">
+                        <h3 class="column-title">NORMAL</h3>
+                        <div class="actions-list" id="normalActions">
+                            ${this.createActionsList('normal')}
+                        </div>
+                    </div>
+                    
+                    <div class="actions-column">
+                        <h3 class="column-title">SHIFT</h3>
+                        <div class="actions-list" id="shiftActions">
+                            ${this.createActionsList('shift')}
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
         
-        this.createAPCButtons();
-        this.createActionsGrid();
+        this.setupActionEvents();
     },
 
     createAPCButtons() {
-        const grid = document.getElementById('apcButtonsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = '';
-        
+        let html = '';
         for (let buttonId = 82; buttonId <= 89; buttonId++) {
-            const button = document.createElement('div');
-            button.className = 'apc-button';
-            button.dataset.buttonId = buttonId;
-            button.dataset.mode = this.currentMode;
-            
-            const config = this.buttonConfigs[buttonId];
-            const actionKey = config[this.currentMode];
-            const actionName = this.getActionName(actionKey);
-            
-            button.innerHTML = `
-                <div class="mode-indicator"></div>
-                <div class="button-number">${buttonId}</div>
-                <div class="button-label">Bouton ${buttonId}</div>
-                <div class="button-action ${actionKey ? '' : 'empty'}">
-                    ${actionName || 'Non assigné'}
-                </div>
+            html += `
+                <button class="apc-button" 
+                        data-button="${buttonId}" 
+                        onclick="Buttons.selectButton(${buttonId})">
+                    ${buttonId}
+                </button>
             `;
-            
-            // Events
-            button.addEventListener('click', () => this.selectButton(buttonId));
-            
-            // Marquer comme configuré si au moins une action
-            if (config.normal || config.shift) {
-                button.classList.add('configured');
-            }
-            
-            grid.appendChild(button);
         }
+        return html;
     },
 
-    createActionsGrid() {
-        const grid = document.getElementById('actionsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = '';
-        
-        Object.entries(this.actions).forEach(([categoryKey, category]) => {
-            const column = document.createElement('div');
-            column.className = 'action-column';
-            
-            column.innerHTML = `
-                <div class="column-title">${category.title}</div>
-                ${Object.entries(category.items).map(([actionKey, actionName]) => `
-                    <div class="action-item" 
-                         data-action="${actionKey}"
-                         title="${actionName}">
-                        ${actionName}
-                    </div>
-                `).join('')}
-            `;
-            
-            grid.appendChild(column);
-        });
-        
-        // Event listeners actions
-        grid.querySelectorAll('.action-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const actionKey = item.dataset.action;
-                this.assignAction(actionKey);
+    createActionsList(mode) {
+        return this.actions[mode].map((action, index) => `
+            <button class="action-button" 
+                    data-mode="${mode}" 
+                    data-action="${action.id}"
+                    data-color="${this.colors[index]}">
+                ${action.name}
+            </button>
+        `).join('');
+    },
+
+    setupActionEvents() {
+        document.querySelectorAll('.action-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                const actionId = btn.dataset.action;
+                const color = btn.dataset.color;
+                this.assignAction(actionId, mode, color);
             });
         });
     },
 
-    // ===== SÉLECTION ===== //
+    // ===== SÉLECTION BOUTON ===== //
     selectButton(buttonId) {
         // Désélectionner ancien
-        this.deselectButton();
+        document.querySelectorAll('.apc-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
         
         // Sélectionner nouveau
         this.selectedButton = buttonId;
-        const button = this.getButtonElement(buttonId);
+        const button = document.querySelector(`[data-button="${buttonId}"]`);
         if (button) {
             button.classList.add('selected');
         }
         
-        this.updateActionsState();
-        
-        App.log(`🎯 Bouton ${buttonId} sélectionné (mode ${this.currentMode})`, 'info');
+        App.log('Bouton ' + buttonId + ' sélectionné', 'info');
     },
 
-    deselectButton() {
-        if (this.selectedButton) {
-            const button = this.getButtonElement(this.selectedButton);
-            if (button) {
-                button.classList.remove('selected');
-            }
-            this.selectedButton = null;
-        }
-        
-        this.updateActionsState();
-    },
-
-    deselectAll() {
-        this.deselectButton();
-    },
-
-    // ===== MODE NORMAL/SHIFT ===== //
-    setupEventListeners() {
-        // Toggle Normal/Shift
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.dataset.mode;
-                if (mode) {
-                    this.switchMode(mode);
-                }
-            });
-        });
-    },
-
-    switchMode(mode) {
-        if (this.currentMode === mode) return;
-        
-        this.currentMode = mode;
-        
-        // UI toggle buttons
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            if (btn.dataset.mode === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        
-        // UI content mode
-        const content = document.querySelector('.buttons-content');
-        if (content) {
-            if (mode === 'shift') {
-                content.classList.add('shift-mode');
-            } else {
-                content.classList.remove('shift-mode');
-            }
-        }
-        
-        // Mettre à jour boutons APC
-        this.updateAPCButtons();
-        this.updateActionsState();
-        
-        App.log(`🔄 Mode ${mode.toUpperCase()} activé`, 'info');
-    },
-
-    updateAPCButtons() {
-        document.querySelectorAll('.apc-button').forEach(button => {
-            const buttonId = parseInt(button.dataset.buttonId);
-            button.dataset.mode = this.currentMode;
-            
-            const config = this.buttonConfigs[buttonId];
-            const actionKey = config[this.currentMode];
-            const actionName = this.getActionName(actionKey);
-            
-            const actionEl = button.querySelector('.button-action');
-            if (actionEl) {
-                actionEl.textContent = actionName || 'Non assigné';
-                actionEl.className = `button-action ${actionKey ? '' : 'empty'}`;
-            }
-        });
-    },
-
-    // ===== ASSIGNATION ACTIONS ===== //
-    assignAction(actionKey) {
+    // ===== ASSIGNATION ACTION ===== //
+    assignAction(actionId, mode, color) {
         if (!this.selectedButton) {
-            this.showFeedback('⚠️ Sélectionnez d\'abord un bouton');
+            App.log('Sélectionnez d\'abord un bouton', 'warning');
             return;
         }
         
-        // Vérifier si action déjà assignée
-        const conflict = this.findActionConflict(actionKey);
-        if (conflict) {
-            this.showFeedback(`⚠️ Action déjà assignée au bouton ${conflict}`);
+        const config = this.buttonConfigs[this.selectedButton];
+        const actionButton = document.querySelector(`[data-action="${actionId}"]`);
+        const apcButton = document.querySelector(`[data-button="${this.selectedButton}"]`);
+        
+        // Si action déjà assignée → clear
+        if (config[mode] === actionId) {
+            this.clearAssignment(mode, actionId);
             return;
         }
         
-        // Assigner action
-        this.buttonConfigs[this.selectedButton][this.currentMode] = actionKey;
+        // Clear ancienne assignation si existe
+        if (config[mode]) {
+            this.clearAssignment(mode, config[mode]);
+        }
         
-        // Mettre à jour interface
-        this.updateAPCButtons();
-        this.updateActionsState();
+        // Nouvelle assignation
+        config[mode] = actionId;
+        config.color = color;
+        
+        // Appliquer couleur
+        if (actionButton) {
+            actionButton.style.backgroundColor = color;
+            actionButton.style.color = '#fff';
+            actionButton.classList.add('assigned');
+        }
+        
+        if (apcButton) {
+            apcButton.style.backgroundColor = color;
+            apcButton.style.color = '#fff';
+        }
+        
         this.saveConfig();
         
-        const actionName = this.getActionName(actionKey);
-        this.showFeedback(`✅ Bouton ${this.selectedButton} → ${actionName}`);
-        
-        App.log(`🔗 Bouton ${this.selectedButton} (${this.currentMode}) → ${actionName}`, 'success');
-        
-        // Désélectionner pour prochaine assignation
-        this.deselectButton();
+        const actionName = this.getActionName(actionId);
+        App.log('Bouton ' + this.selectedButton + ' (' + mode + ') → ' + actionName, 'success');
     },
 
-    findActionConflict(actionKey) {
-        for (let buttonId = 82; buttonId <= 89; buttonId++) {
-            const config = this.buttonConfigs[buttonId];
-            if (config[this.currentMode] === actionKey) {
-                return buttonId;
+    clearAssignment(mode, actionId) {
+        const config = this.buttonConfigs[this.selectedButton];
+        const actionButton = document.querySelector(`[data-action="${actionId}"]`);
+        const apcButton = document.querySelector(`[data-button="${this.selectedButton}"]`);
+        
+        // Clear config
+        config[mode] = null;
+        if (!config.normal && !config.shift) {
+            config.color = null;
+        }
+        
+        // Clear couleurs
+        if (actionButton) {
+            actionButton.style.backgroundColor = '';
+            actionButton.style.color = '';
+            actionButton.classList.remove('assigned');
+        }
+        
+        if (apcButton && !config.normal && !config.shift) {
+            apcButton.style.backgroundColor = '';
+            apcButton.style.color = '';
+        }
+        
+        this.saveConfig();
+        
+        const actionName = this.getActionName(actionId);
+        App.log('Assignation effacée: ' + actionName, 'info');
+    },
+
+    // ===== SHIFT TOGGLE ===== //
+    toggleShift() {
+        this.shiftMode = !this.shiftMode;
+        
+        const toggle = document.getElementById('shiftToggle');
+        if (toggle) {
+            if (this.shiftMode) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
             }
         }
-        return null;
-    },
-
-    updateActionsState() {
-        document.querySelectorAll('.action-item').forEach(item => {
-            const actionKey = item.dataset.action;
-            item.classList.remove('selected', 'disabled');
-            
-            // Marquer action du bouton sélectionné
-            if (this.selectedButton) {
-                const currentAction = this.buttonConfigs[this.selectedButton][this.currentMode];
-                if (currentAction === actionKey) {
-                    item.classList.add('selected');
-                }
-            }
-            
-            // Griser actions déjà assignées
-            const conflict = this.findActionConflict(actionKey);
-            if (conflict && conflict !== this.selectedButton) {
-                item.classList.add('disabled');
-            }
-        });
     },
 
     // ===== UTILITAIRES ===== //
-    getActionName(actionKey) {
-        if (!actionKey) return '';
-        
-        for (const category of Object.values(this.actions)) {
-            if (category.items[actionKey]) {
-                return category.items[actionKey];
-            }
+    getActionName(actionId) {
+        for (const mode of ['normal', 'shift']) {
+            const action = this.actions[mode].find(a => a.id === actionId);
+            if (action) return action.name;
         }
-        return actionKey;
+        return actionId;
     },
 
-    getButtonElement(buttonId) {
-        return document.querySelector(`[data-button-id="${buttonId}"]`);
-    },
-
-    showFeedback(message) {
-        // Supprimer ancien feedback
-        const existing = document.querySelector('.assignment-feedback');
-        if (existing) existing.remove();
-        
-        // Créer nouveau feedback
-        const feedback = document.createElement('div');
-        feedback.className = 'assignment-feedback';
-        feedback.textContent = message;
-        document.body.appendChild(feedback);
-        
-        // Supprimer après 2 secondes
-        setTimeout(() => {
-            if (feedback.parentNode) {
-                feedback.parentNode.removeChild(feedback);
-            }
-        }, 2000);
-    },
-
-    // ===== INTERFACE PUBLIQUE ===== //
     updateInterface() {
-        this.updateAPCButtons();
-        this.updateActionsState();
+        // Restaurer les assignations visuelles
+        Object.entries(this.buttonConfigs).forEach(([buttonId, config]) => {
+            if (config.color) {
+                const apcButton = document.querySelector(`[data-button="${buttonId}"]`);
+                if (apcButton) {
+                    apcButton.style.backgroundColor = config.color;
+                    apcButton.style.color = '#fff';
+                }
+                
+                // Restaurer couleurs actions
+                ['normal', 'shift'].forEach(mode => {
+                    if (config[mode]) {
+                        const actionButton = document.querySelector(`[data-action="${config[mode]}"]`);
+                        if (actionButton) {
+                            actionButton.style.backgroundColor = config.color;
+                            actionButton.style.color = '#fff';
+                            actionButton.classList.add('assigned');
+                        }
+                    }
+                });
+            }
+        });
     },
 
-    clearButton(buttonId) {
-        this.buttonConfigs[buttonId] = { normal: '', shift: '' };
-        this.updateInterface();
-        this.saveConfig();
+    // ===== PREVIEW MIDI ===== //
+    handleMIDIPreview(message) {
+        const { status, note, velocity } = message;
         
-        App.log(`🧹 Bouton ${buttonId} effacé`, 'info');
-    },
-
-    clearAll() {
-        for (let buttonId = 82; buttonId <= 89; buttonId++) {
-            this.buttonConfigs[buttonId] = { normal: '', shift: '' };
+        // Boutons 82-89
+        if (note >= 82 && note <= 89 && velocity > 0) {
+            const button = document.querySelector(`[data-button="${note}"]`);
+            if (button) {
+                button.classList.add('midi-feedback');
+                setTimeout(() => {
+                    button.classList.remove('midi-feedback');
+                }, 200);
+            }
+            
+            App.log('Bouton ' + note + ' pressé', 'info');
         }
         
-        this.updateInterface();
-        this.saveConfig();
-        
-        App.log('🧹 Tous les boutons effacés', 'info');
-    },
-
-    resetToDefault() {
-        this.initButtonConfigs();
-        this.updateInterface();
-        this.saveConfig();
-        
-        App.log('🔄 Configuration boutons réinitialisée', 'info');
+        // Shift (note 98)
+        if (note === 98) {
+            const isPressed = velocity > 0;
+            if (isPressed) {
+                this.toggleShift();
+            }
+        }
     },
 
     // ===== CONFIGURATION ===== //
@@ -424,28 +316,11 @@ const Buttons = {
         return this.buttonConfigs;
     },
 
-    // ===== PREVIEW MIDI ===== //
-    handleMIDIPreview(message) {
-        const { status, note, velocity } = message;
-        
-        // Boutons 82-89
-        if (note >= 82 && note <= 89 && velocity > 0) {
-            const button = this.getButtonElement(note);
-            if (button) {
-                button.classList.add('midi-feedback');
-                setTimeout(() => {
-                    button.classList.remove('midi-feedback');
-                }, 200);
-            }
-            
-            App.log(`🎹 Bouton ${note} pressé`, 'info');
-        }
-        
-        // Shift (note 98)
-        if (note === 98) {
-            const isPressed = velocity > 0;
-            App.log(`⇧ Shift ${isPressed ? 'pressé' : 'relâché'}`, 'info');
-        }
+    deselectAll() {
+        this.selectedButton = null;
+        document.querySelectorAll('.apc-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
     }
 };
 

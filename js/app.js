@@ -19,7 +19,7 @@ const App = {
             sequencer: {
                 scale: 'C_Major',
                 octave: 3,
-                steps: [],
+                steps: Array(16).fill(false),
                 playhead: 0,
                 isPlaying: false
             }
@@ -28,19 +28,15 @@ const App = {
 
     // ===== INITIALISATION ===== 
     init() {
-        this.log('Interface APC Mini MK1 chargée', 'system');
-        
         this.setupNavigation();
-        this.setupMIDI();
         this.loadConfig();
         this.initModules();
-        
-        this.log('Interface prête', 'success');
+        this.autoConnectMIDI();
     },
 
-    // ===== NAVIGATION BOUTONS ===== 
+    // ===== NAVIGATION ===== 
     setupNavigation() {
-        const navButtons = document.querySelectorAll('.nav-btn');
+        const navButtons = document.querySelectorAll('.header-btn[data-view]');
         
         navButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -56,7 +52,7 @@ const App = {
         this.state.currentView = viewId;
         
         // Mettre à jour boutons navigation
-        document.querySelectorAll('.nav-btn').forEach(btn => {
+        document.querySelectorAll('.header-btn[data-view]').forEach(btn => {
             if (btn.dataset.view === viewId) {
                 btn.classList.add('active');
             } else {
@@ -65,7 +61,7 @@ const App = {
         });
         
         // Mettre à jour vues
-        document.querySelectorAll('.view-panel').forEach(panel => {
+        document.querySelectorAll('.view-content').forEach(panel => {
             if (panel.id === `view-${viewId}`) {
                 panel.classList.add('active');
             } else {
@@ -75,121 +71,177 @@ const App = {
         
         // Initialiser module si nécessaire
         this.initViewModule(viewId);
-        
-        this.log(`Vue ${viewId.toUpperCase()} activée`, 'info');
     },
 
     initViewModule(viewId) {
         switch(viewId) {
             case 'pads':
-                if (typeof Pads !== 'undefined') Pads.init();
+                if (typeof Pads !== 'undefined' && !Pads.isInitialized) {
+                    Pads.init();
+                }
                 break;
             case 'buttons':
-                if (typeof Buttons !== 'undefined') Buttons.init();
+                if (typeof Buttons !== 'undefined' && !Buttons.isInitialized) {
+                    Buttons.init();
+                }
                 break;
             case 'sequencer':
-                if (typeof Sequencer !== 'undefined') Sequencer.init();
+                if (typeof Sequencer !== 'undefined' && !Sequencer.isInitialized) {
+                    Sequencer.init();
+                }
                 break;
             case 'export':
-                if (typeof Export !== 'undefined') Export.init();
+                if (typeof Export !== 'undefined' && !Export.isInitialized) {
+                    Export.init();
+                }
                 break;
         }
     },
 
-    // ===== CONNEXION MIDI ===== 
-    setupMIDI() {
-        const connectBtn = document.getElementById('connectBtn');
-        if (connectBtn) {
-            connectBtn.addEventListener('click', () => {
-                this.connectMIDI();
-            });
+    // ===== CONNEXION MIDI AUTOMATIQUE ===== 
+    async autoConnectMIDI() {
+        try {
+            if (typeof MIDI === 'undefined') {
+                throw new Error('Module MIDI non disponible');
+            }
+            
+            const success = await MIDI.connect();
+            this.updateConnectionStatus(success);
+            
+            if (success) {
+                this.log('APC Mini connecté', 'success');
+                this.setupMIDIListeners();
+                this.syncMIDI();
+            }
+            
+        } catch (error) {
+            this.updateConnectionStatus(false);
+            this.log('Erreur connexion: ' + error.message, 'error');
         }
     },
 
-    async connectMIDI() {
-        this.log('Tentative de connexion MIDI...', 'info');
+    updateConnectionStatus(connected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (!statusElement) return;
         
-        if (typeof MIDI === 'undefined') {
-            this.log('Module MIDI non disponible', 'error');
-            return false;
-        }
+        this.state.midiConnected = connected;
         
-        const success = await MIDI.connect();
-        this.state.midiConnected = success;
-        
-        const connectBtn = document.getElementById('connectBtn');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        
-        if (success) {
-            if (connectBtn) {
-                connectBtn.textContent = 'CONNECTÉ';
-                connectBtn.classList.add('connected');
-            }
-            
-            if (statusDot) statusDot.classList.add('connected');
-            if (statusText) statusText.textContent = 'Connecté';
-            
-            this.log('APC Mini connecté avec succès', 'success');
-            this.syncMIDI();
-            
+        if (connected) {
+            statusElement.textContent = 'Connecté';
+            statusElement.style.backgroundColor = '#4a6a4a';
+            statusElement.style.borderColor = '#5a7a5a';
+            statusElement.style.color = '#e0e0e0';
         } else {
-            if (connectBtn) {
-                connectBtn.textContent = 'ÉCHEC';
-                setTimeout(() => {
-                    connectBtn.textContent = 'CONNEXION';
-                }, 2000);
-            }
-            
-            this.log('Connexion APC Mini échouée', 'error');
+            statusElement.textContent = 'Déconnecté';
+            statusElement.style.backgroundColor = '#5a4a4a';
+            statusElement.style.borderColor = '#6a5555';
+            statusElement.style.color = '#e0e0e0';
         }
-        
-        return success;
+    },
+
+    setupMIDIListeners() {
+        // Écouter les messages MIDI pour tous les modules
+        window.addEventListener('midi-message', (event) => {
+            const { status, note, velocity } = event.detail;
+            
+            // Distribuer aux modules selon la vue active
+            switch(this.state.currentView) {
+                case 'pads':
+                    if (typeof Pads !== 'undefined' && Pads.handleMIDIPreview) {
+                        Pads.handleMIDIPreview(event.detail);
+                    }
+                    break;
+                case 'buttons':
+                    if (typeof Buttons !== 'undefined' && Buttons.handleMIDIPreview) {
+                        Buttons.handleMIDIPreview(event.detail);
+                    }
+                    break;
+                case 'sequencer':
+                    if (typeof Sequencer !== 'undefined' && Sequencer.handleMIDIPreview) {
+                        Sequencer.handleMIDIPreview(event.detail);
+                    }
+                    break;
+            }
+        });
     },
 
     syncMIDI() {
-        if (typeof Pads !== 'undefined') {
+        // Synchroniser tous les modules avec l'APC Mini
+        if (typeof Pads !== 'undefined' && Pads.syncToMIDI) {
             Pads.syncToMIDI();
         }
         
-        this.log('Preview MIDI synchronisé', 'info');
+        if (typeof Sequencer !== 'undefined' && Sequencer.syncToMIDI) {
+            Sequencer.syncToMIDI();
+        }
+    },
+
+    disconnectMIDI() {
+        if (typeof MIDI !== 'undefined') {
+            MIDI.disconnect();
+        }
+        
+        this.updateConnectionStatus(false);
+        this.log('APC Mini déconnecté', 'info');
+    },
+
+    // ===== EXPORT AVEC DÉCONNEXION ===== 
+    async exportConfig() {
+        // Déconnecter automatiquement l'APC Mini
+        this.disconnectMIDI();
+        
+        // Lancer l'export
+        if (typeof Export !== 'undefined' && Export.generateScript) {
+            await Export.generateScript();
+        }
     },
 
     // ===== INITIALISATION MODULES ===== 
     initModules() {
-        const modules = ['MIDI', 'Pads', 'Buttons', 'Sequencer', 'Export'];
+        const modules = [
+            { name: 'MIDI', obj: window.MIDI },
+            { name: 'Pads', obj: window.Pads },
+            { name: 'Buttons', obj: window.Buttons },
+            { name: 'Sequencer', obj: window.Sequencer },
+            { name: 'Export', obj: window.Export }
+        ];
         
-        modules.forEach(moduleName => {
-            if (typeof window[moduleName] !== 'undefined') {
-                if (window[moduleName].init) {
-                    try {
-                        window[moduleName].init();
-                        this.log(`Module ${moduleName} initialisé`, 'info');
-                    } catch (error) {
-                        this.log(`Erreur module ${moduleName}: ${error.message}`, 'error');
+        modules.forEach(({ name, obj }) => {
+            if (obj && typeof obj.init === 'function') {
+                try {
+                    // Ne pas initialiser automatiquement les modules de vue
+                    if (!['Pads', 'Buttons', 'Sequencer', 'Export'].includes(name)) {
+                        obj.init();
                     }
+                } catch (error) {
+                    this.log('Erreur module ' + name + ': ' + error.message, 'error');
                 }
             }
         });
         
+        // Initialiser le module de la vue actuelle
         this.initViewModule(this.state.currentView);
     },
 
     // ===== LOGGING ===== 
     log(message, type = 'info') {
         const console = document.getElementById('console');
-        if (!console) return;
+        if (!console) {
+            window.console.log('[' + type.toUpperCase() + '] ' + message);
+            return;
+        }
         
         const timestamp = new Date().toLocaleTimeString();
         const entry = document.createElement('div');
-        entry.className = `log-entry ${type}`;
-        entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+        entry.className = 'log-entry ' + type;
+        
+        entry.innerHTML = '<span class="timestamp">[' + timestamp + ']</span> ' + message;
         
         console.appendChild(entry);
         console.scrollTop = console.scrollHeight;
         
-        // Limiter à 100 entrées
-        while (console.children.length > 100) {
+        // Limiter à 50 entrées pour les performances
+        while (console.children.length > 50) {
             console.removeChild(console.firstChild);
         }
     },
@@ -198,7 +250,6 @@ const App = {
         const console = document.getElementById('console');
         if (console) {
             console.innerHTML = '';
-            this.log('Console effacée', 'system');
         }
     },
 
@@ -208,31 +259,52 @@ const App = {
             const saved = localStorage.getItem('apcMiniMK1Config');
             if (saved) {
                 const config = JSON.parse(saved);
-                this.state.config = { ...this.state.config, ...config };
-                this.log('Configuration chargée', 'info');
+                this.state.config = this.mergeConfig(this.state.config, config);
+                
+                // Notifier les modules
+                this.broadcastConfigChange();
             }
         } catch (error) {
-            this.log(`Erreur chargement config: ${error.message}`, 'error');
+            this.log('Erreur chargement config: ' + error.message, 'error');
         }
     },
 
     saveConfig() {
         try {
             localStorage.setItem('apcMiniMK1Config', JSON.stringify(this.state.config));
-            this.log('Configuration sauvegardée', 'info');
         } catch (error) {
-            this.log(`Erreur sauvegarde config: ${error.message}`, 'error');
+            this.log('Erreur sauvegarde config: ' + error.message, 'error');
         }
     },
 
     updateConfig(section, data) {
-        if (this.state.config[section]) {
-            this.state.config[section] = { ...this.state.config[section], ...data };
-        } else {
-            this.state.config[section] = data;
+        if (!this.state.config[section]) {
+            this.state.config[section] = {};
         }
         
+        this.state.config[section] = { ...this.state.config[section], ...data };
         this.saveConfig();
+        this.broadcastConfigChange();
+    },
+
+    mergeConfig(base, update) {
+        const result = { ...base };
+        
+        for (const [key, value] of Object.entries(update)) {
+            if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+                result[key] = this.mergeConfig(result[key] || {}, value);
+            } else {
+                result[key] = value;
+            }
+        }
+        
+        return result;
+    },
+
+    broadcastConfigChange() {
+        window.dispatchEvent(new CustomEvent('config-changed', {
+            detail: this.state.config
+        }));
     },
 
     // ===== GETTERS ===== 
@@ -252,11 +324,9 @@ const App = {
     destroy() {
         this.saveConfig();
         
-        if (this.state.midiConnected && typeof MIDI !== 'undefined') {
-            MIDI.disconnect();
+        if (this.state.midiConnected) {
+            this.disconnectMIDI();
         }
-        
-        this.log('Application fermée', 'system');
     }
 };
 
@@ -272,20 +342,27 @@ document.addEventListener('keydown', (event) => {
         App.saveConfig();
     }
     
-    // Échap : Désélectionner
+    // Échap : Désélectionner selon la vue
     if (event.key === 'Escape') {
         const currentView = App.getCurrentView();
         
-        if (currentView === 'pads' && typeof Pads !== 'undefined') {
-            Pads.deselectAll();
-        } else if (currentView === 'buttons' && typeof Buttons !== 'undefined') {
-            Buttons.deselectAll();
+        switch(currentView) {
+            case 'pads':
+                if (typeof Pads !== 'undefined' && Pads.deselectAll) {
+                    Pads.deselectAll();
+                }
+                break;
+            case 'buttons':
+                if (typeof Buttons !== 'undefined' && Buttons.deselectAll) {
+                    Buttons.deselectAll();
+                }
+                break;
         }
     }
     
-    // Touches 1-5 : Changer de vue
-    if (event.key >= '1' && event.key <= '5' && !event.ctrlKey && !event.altKey) {
-        const views = ['pads', 'buttons', 'sequencer', 'connexion', 'export'];
+    // Touches 1-4 : Changer de vue
+    if (event.key >= '1' && event.key <= '4' && !event.ctrlKey && !event.altKey) {
+        const views = ['pads', 'buttons', 'sequencer', 'export'];
         const viewIndex = parseInt(event.key) - 1;
         if (views[viewIndex]) {
             App.switchView(views[viewIndex]);

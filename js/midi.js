@@ -1,5 +1,3 @@
-// ===== MIDI.JS - MINIMAL POUR PREVIEW ===== //
-
 const MIDI = {
     access: null,
     input: null,

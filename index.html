@@ -7,7 +7,6 @@
     <title>APC Mini MK1 Configurator</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/pads.css">
-    <link rel="stylesheet" href="css/buttons.css">
     <link rel="stylesheet" href="css/sequencer.css">
     <link rel="stylesheet" href="css/export.css">
 </head>
@@ -17,14 +16,14 @@
 
         <div class="header">
             <h1>AKAI APC MINI MK1</h1>
-
+        
             <div class="header-buttons">
-                <button class="header-btn active" onclick="App.switchView('pads')">Pad</button>
-                <button class="header-btn" onclick="App.switchView('buttons')">boutons</button>
-                <button class="header-btn" onclick="App.switchView('sequencer')">sequenceur</button>
-                <button class="header-btn" onclick="App.switchView('export')">export</button>
-                <button class="header-btn">connexion</button>
+                <button class="header-btn active" data-view="pads">Pads</button>
+                <button class="header-btn" data-view="sequencer">Sequenceur</button>
+                <button class="header-btn" data-view="export">Export</button>
             </div>
+            <div class="header-status" id="connectionStatus">Déconnecté</div>
+        
         </div>
 
         <div class="main-layout">
@@ -35,13 +34,6 @@
                 <div id="view-pads" class="view-content active">
                     <div class="pad-grid" id="padGrid">
                         <!-- Généré par pads.js -->
-                    </div>
-                </div>
-
-                <!-- Vue Boutons -->
-                <div id="view-buttons" class="view-content">
-                    <div class="buttons-content">
-                        <!-- Généré par buttons.js -->
                     </div>
                 </div>
 
@@ -60,19 +52,16 @@
                 </div>
             </div>
 
-
             <div class="control-panel">
 
                 <!-- Section config (haut) -->
                 <div class="config-section">
                     <div class="config-mode-selector">
-                        <button class="mode-btn active" data-mode="pad">pad</button>
-                        <button class="mode-btn" data-mode="groupe">Groupe</button>
+                        <button class="mode-btn active" data-mode="individual">Pad</button>
+                        <button class="mode-btn" data-mode="groups">Groupe</button>
                     </div>
 
-
                     <div id="configContent">
-
                         <div class="placeholder-text">
                             Sélectionnez un élément pour le configurer
                         </div>
@@ -81,10 +70,14 @@
 
                 <!-- Console (bas) -->
                 <div class="console">
+                    <div class="console-header">
+                        <span>Console APC Mini</span>
+                        <button class="console-clear" onclick="App.clearConsole()">Effacer</button>
+                    </div>
                     <div class="console-content" id="console">
                         <div class="log-entry system">
                             <span class="timestamp">[Init]</span>
-                            Console APC Mini MK1
+                            Interface APC Mini MK1 chargée
                         </div>
                     </div>
                 </div>
@@ -95,10 +88,17 @@
     <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/midi.js"></script>
+    <script src="js/mapping-buttons.js"></script>
     <script src="js/pads.js"></script>
-    <script src="js/buttons.js"></script>
     <script src="js/sequencer.js"></script>
     <script src="js/export.js"></script>
+
+    <script>
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
 
 </body>
 
