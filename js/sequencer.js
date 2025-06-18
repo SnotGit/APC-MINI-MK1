@@ -1,562 +1,405 @@
 const Sequencer = {
     
-    // ===== ÉTAT ===== //
-    currentScale: 'C_Major',
-    currentOctave: 3,
-    currentMode: 'compose', // 'compose' | 'perform'
-    steps: Array(16).fill(false),
-    playhead: 0,
-    isPlaying: false,
+    // ===== ÉTAT =====
     isInitialized: false,
+    activeGroup: null, // 2 ou 3
+    currentMode: 'steps', // 'steps' | 'scales'
     
-    // ===== MAPPING CORRIGÉ GROUPE 3 (HAUT-DROITE) ===== //
+    // ===== CONFIGURATION MUSICALE =====
+    selectedScale: 'major',
+    octaveBase: 0,
+    selectedSwing: 50,
+    rootNote: 60, // C4 par défaut
+    
+    // ===== SÉQUENCEUR =====
+    steps: Array(16).fill(false),
+    isPlaying: false,
+    currentStep: 0,
+    
+    // ===== MAPPING GROUPE 3 (16 STEPS) =====
     stepPads: [
-        61, 62, 63, 64,  // Row 8 (haut)
-        53, 54, 55, 56,  // Row 7
-        45, 46, 47, 48,  // Row 6  
-        37, 38, 39, 40   // Row 5
+        61, 62, 63, 64,  // Row 1
+        53, 54, 55, 56,  // Row 2  
+        45, 46, 47, 48,  // Row 3
+        37, 38, 39, 40   // Row 4
     ],
-
-    // ===== CONTRÔLES SEQUENCER ===== //
-    controlPads: {
-        play_stop: 29,    // Play/Stop sequencer
-        clear: 30,        // Clear tous les steps
-        mode_change: 31,  // Toggle compose/perform
-        scale_access: 32  // Accès rapide gammes
-    },
-
-    // ===== 16 GAMMES MUSICALES ===== //
+    
+    // ===== GAMMES MUSICALES =====
     scales: {
-        'C_Major': { name: 'C Major', notes: [0, 2, 4, 5, 7, 9, 11] },
-        'C_Minor': { name: 'C Minor', notes: [0, 2, 3, 5, 7, 8, 10] },
-        'D_Major': { name: 'D Major', notes: [2, 4, 6, 7, 9, 11, 1] },
-        'D_Minor': { name: 'D Minor', notes: [2, 4, 5, 7, 9, 10, 0] },
-        'E_Minor': { name: 'E Minor', notes: [4, 6, 7, 9, 11, 0, 2] },
-        'F_Major': { name: 'F Major', notes: [5, 7, 9, 10, 0, 2, 4] },
-        'G_Major': { name: 'G Major', notes: [7, 9, 11, 0, 2, 4, 6] },
-        'A_Minor': { name: 'A Minor', notes: [9, 11, 0, 2, 4, 5, 7] },
-        'Pentatonic': { name: 'Pentatonic', notes: [0, 2, 4, 7, 9] },
-        'Blues': { name: 'Blues', notes: [0, 3, 5, 6, 7, 10] },
-        'Dorian': { name: 'Dorian', notes: [0, 2, 3, 5, 7, 9, 10] },
-        'Mixolydian': { name: 'Mixolydian', notes: [0, 2, 4, 5, 7, 9, 10] },
-        'Phrygian': { name: 'Phrygian', notes: [0, 1, 3, 5, 7, 8, 10] },
-        'Lydian': { name: 'Lydian', notes: [0, 2, 4, 6, 7, 9, 11] },
-        'Chromatic': { name: 'Chromatic', notes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
-        'Whole_Tone': { name: 'Whole Tone', notes: [0, 2, 4, 6, 8, 10] }
+        'major': { name: 'Major', intervals: [0, 2, 4, 5, 7, 9, 11] },
+        'minor': { name: 'Minor', intervals: [0, 2, 3, 5, 7, 8, 10] },
+        'pentatonic': { name: 'Pentatonic', intervals: [0, 2, 4, 7, 9] },
+        'blues': { name: 'Blues', intervals: [0, 3, 5, 6, 7, 10] },
+        'dorian': { name: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
+        'mixolydian': { name: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10] },
+        'phrygian': { name: 'Phrygian', intervals: [0, 1, 3, 5, 7, 8, 10] },
+        'chromatic': { name: 'Chromatic', intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
     },
-
-    // ===== INITIALISATION ===== //
+    
+    // ===== SWING PRESETS =====
+    swingPresets: [20, 25, 50, 63],
+    
+    // ===== INITIALISATION =====
     init() {
         if (this.isInitialized) return;
         
-        this.createInterface();
+        this.createSequencerInterface();
+        this.createControlPanel();
         this.setupEventListeners();
-        this.updateInterface();
         this.isInitialized = true;
         
+        App.log('✅ Séquenceur initialisé', 'info');
     },
-
-    // ===== INTERFACE ===== //
-    createInterface() {
+    
+    // ===== INTERFACE GAUCHE (GRILLE + SWING) =====
+    createSequencerInterface() {
         const container = document.querySelector('.sequencer-content');
         if (!container) return;
         
         container.innerHTML = `
-            <!-- Section Steps -->
-            <div class="steps-section">
-                <h3 class="steps-title">16 Steps - Groupe 3 (Haut-Droite)</h3>
-                <div class="steps-grid" id="stepsGrid">
-                    <!-- Généré par createStepsGrid() -->
-                </div>
+            <!-- GRILLE 4x4 -->
+            <div class="sequencer-grid" id="sequencerGrid">
+                <!-- Généré par createGrid() -->
             </div>
             
-            <!-- Section Contrôles -->
-            <div class="controls-section">
-                <h3 class="controls-title">Contrôles Séquenceur (Pads 29-32)</h3>
-                <div class="sequencer-controls" id="sequencerControls">
-                    <button class="control-pad" data-pad="29" data-function="play_stop">
-                        <span class="pad-number">29</span>
-                        <span class="pad-function">Play/Stop</span>
-                    </button>
-                    <button class="control-pad" data-pad="30" data-function="clear">
-                        <span class="pad-number">30</span>
-                        <span class="pad-function">Clear</span>
-                    </button>
-                    <button class="control-pad" data-pad="31" data-function="mode_change">
-                        <span class="pad-number">31</span>
-                        <span class="pad-function">Mode</span>
-                    </button>
-                    <button class="control-pad" data-pad="32" data-function="scale_access">
-                        <span class="pad-number">32</span>
-                        <span class="pad-function">Gammes</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Section Configuration -->
-            <div class="config-section">
-                <h3 class="config-title">Configuration</h3>
-                
-                <div class="sequencer-controls-panel">
-                    <div class="control-group">
-                        <div class="control-label">Mode Sequencer</div>
-                        <div class="mode-selector">
-                            <button class="mode-option active" data-mode="compose">Composition</button>
-                            <button class="mode-option" data-mode="perform">Performance</button>
-                        </div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <div class="control-label">Actions</div>
-                        <div class="action-buttons">
-                            <button class="seq-btn" onclick="Sequencer.clearSteps()">Effacer</button>
-                            <button class="seq-btn" onclick="Sequencer.randomSteps()">Aléatoire</button>
-                            <button class="seq-btn primary" onclick="Sequencer.testPlayhead()">Test Playhead</button>
-                            <button class="seq-btn danger" onclick="Sequencer.stopPlayhead()">Stop</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="scale-info">
-                    <div class="scale-info-title">Gamme Actuelle</div>
-                    <div id="scaleDisplay">
-                        <!-- Généré par updateScaleDisplay() -->
-                    </div>
-                </div>
-                
-                <div class="group-mapping">
-                    <div class="mapping-title">Mapping Groupe 3 (Haut-Droite)</div>
-                    <div class="mapping-grid" id="mappingGrid">
-                        <!-- Généré par createMappingDisplay() -->
-                    </div>
+            <!-- SECTION SWING -->
+            <div class="swing-section">
+                <div class="swing-title">Réglage du Swing :</div>
+                <div class="swing-buttons" id="swingButtons">
+                    ${this.swingPresets.map(value => `
+                        <button class="swing-btn ${value === this.selectedSwing ? 'active' : ''}" 
+                                data-swing="${value}" onclick="Sequencer.setSwing(${value})">
+                            ${value}%
+                        </button>
+                    `).join('')}
                 </div>
             </div>
         `;
         
-        this.createStepsGrid();
-        this.createMappingDisplay();
-        this.updateScaleDisplay();
-        this.setupControlPads();
+        this.createGrid();
     },
-
-    createStepsGrid() {
-        const grid = document.getElementById('stepsGrid');
+    
+    // ===== INTERFACE DROITE (PANEL FEEDBACK) =====
+    createControlPanel() {
+        const configPanel = document.getElementById('configContent');
+        if (!configPanel) return;
+        
+        configPanel.innerHTML = `
+            <!-- PANEL INFO -->
+            <div class="sequencer-feedback-panel">
+                <div class="feedback-title">Groupe : <span id="groupDisplay">${this.activeGroup || 'Aucun'}</span></div>
+                <div class="feedback-separator"></div>
+                <div class="feedback-row">
+                    <span>Scale :</span>
+                    <div class="feedback-value" id="scaleDisplay">${this.scales[this.selectedScale].name}</div>
+                </div>
+                <div class="feedback-row">
+                    <span>Octave :</span>
+                    <div class="octave-controls">
+                        <button class="octave-btn" onclick="Sequencer.changeOctave(-1)">−</button>
+                        <div class="octave-value" id="octaveDisplay">${this.octaveBase}</div>
+                        <button class="octave-btn" onclick="Sequencer.changeOctave(1)">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PANEL STATUS -->
+            <div class="sequencer-status-panel">
+                <div class="status-title">État Séquenceur</div>
+                <div class="status-info">
+                    <div>Mode : <span id="modeDisplay">${this.currentMode}</span></div>
+                    <div>Steps : <span id="stepsDisplay">${this.steps.filter(Boolean).length}/16</span></div>
+                    <div>Swing : <span id="swingDisplay">${this.selectedSwing}%</span></div>
+                </div>
+            </div>
+        `;
+    },
+    
+    // ===== GRILLE 4x4 DYNAMIQUE =====
+    createGrid() {
+        const grid = document.getElementById('sequencerGrid');
         if (!grid) return;
         
         grid.innerHTML = '';
         
+        if (this.currentMode === 'steps') {
+            this.createStepsGrid(grid);
+        } else {
+            this.createScalesGrid(grid);
+        }
+    },
+    
+    createStepsGrid(grid) {
         for (let i = 0; i < 16; i++) {
             const step = document.createElement('div');
-            step.className = 'step';
-            step.dataset.stepIndex = i;
-            
-            const padNumber = this.stepPads[i];
-            const midiNote = this.padToMIDI(padNumber);
-            const stepNote = this.getStepNote(i);
-            
-            step.innerHTML = `
-                <div class="step-number">${i + 1}</div>
-                <div class="step-pad">Pad ${padNumber}</div>
-                <div class="step-note">${stepNote}</div>
-            `;
-            
-            // Events
+            step.className = `sequencer-pad step-pad ${this.steps[i] ? 'programmed' : ''}`;
+            step.dataset.step = i;
+            step.innerHTML = `<span class="pad-label">${this.stepPads[i]}</span>`;
             step.addEventListener('click', () => this.toggleStep(i));
-            
-            // État initial
-            if (this.steps[i]) {
-                step.classList.add('programmed');
-            }
-            
             grid.appendChild(step);
         }
     },
-
-    createMappingDisplay() {
-        const grid = document.getElementById('mappingGrid');
-        if (!grid) return;
+    
+    createScalesGrid(grid) {
+        const elements = [
+            // Row 1-2: Gammes (8)
+            { type: 'scale', value: 'major', label: 'Major' },
+            { type: 'scale', value: 'minor', label: 'Minor' },
+            { type: 'scale', value: 'pentatonic', label: 'Penta' },
+            { type: 'scale', value: 'blues', label: 'Blues' },
+            { type: 'scale', value: 'dorian', label: 'Dorian' },
+            { type: 'scale', value: 'mixolydian', label: 'Mixo' },
+            { type: 'scale', value: 'phrygian', label: 'Phryg' },
+            { type: 'scale', value: 'chromatic', label: 'Chroma' },
+            
+            // Row 3: Swing (4)
+            { type: 'swing', value: 20, label: 'Swing' },
+            { type: 'swing', value: 25, label: 'Swing' },
+            { type: 'swing', value: 50, label: 'Swing' },
+            { type: 'swing', value: 63, label: 'Swing' },
+            
+            // Row 4: Contrôles (4)
+            { type: 'control', value: 'play', label: 'Play' },
+            { type: 'control', value: 'mode', label: 'Mode' },
+            { type: 'control', value: 'scales', label: 'Scales' },
+            { type: 'control', value: 'clear', label: 'Clear' }
+        ];
         
-        grid.innerHTML = '';
-        
-        // Afficher le mapping visuel du Groupe 3 (4x4)
-        for (let row = 0; row < 4; row++) {
-            for (let col = 0; col < 4; col++) {
-                const stepIndex = row * 4 + col;
-                const padNumber = this.stepPads[stepIndex];
-                
-                const pad = document.createElement('div');
-                pad.className = 'mapping-pad sequencer';
-                pad.innerHTML = `
-                    <span class="pad-number">${padNumber}</span>
-                    <span class="step-number">S${stepIndex + 1}</span>
-                `;
-                pad.title = `Step ${stepIndex + 1} → Pad ${padNumber}`;
-                grid.appendChild(pad);
+        elements.forEach((element, index) => {
+            const pad = document.createElement('div');
+            pad.className = `sequencer-pad ${element.type}-pad`;
+            pad.dataset.type = element.type;
+            pad.dataset.value = element.value;
+            pad.innerHTML = `<span class="pad-label">${element.label}</span>`;
+            
+            // États actifs
+            if (element.type === 'scale' && element.value === this.selectedScale) {
+                pad.classList.add('active');
             }
-        }
-    },
-
-    setupControlPads() {
-        document.querySelectorAll('.control-pad').forEach(pad => {
-            pad.addEventListener('click', () => {
-                const func = pad.dataset.function;
-                this.executeControlFunction(func);
-            });
+            if (element.type === 'swing' && element.value === this.selectedSwing) {
+                pad.classList.add('active');
+            }
+            if (element.type === 'control' && element.value === this.currentMode) {
+                pad.classList.add('active');
+            }
+            
+            pad.addEventListener('click', () => this.handleGridClick(element));
+            grid.appendChild(pad);
         });
     },
-
-    executeControlFunction(func) {
-        switch(func) {
-            case 'play_stop':
-                if (this.isPlaying) {
-                    this.stopPlayhead();
-                } else {
-                    this.testPlayhead();
-                }
+    
+    // ===== ÉVÉNEMENTS =====
+    setupEventListeners() {
+        // Navigation mode depuis pads
+        window.addEventListener('pads-sequencer-activated', (event) => {
+            this.activeGroup = event.detail.group;
+            this.updateInterface();
+        });
+        
+        // MIDI preview
+        window.addEventListener('midi-message', (event) => {
+            if (App.getCurrentView() === 'sequencer') {
+                this.handleMIDIPreview(event.detail);
+            }
+        });
+    },
+    
+    handleGridClick(element) {
+        switch (element.type) {
+            case 'scale':
+                this.setScale(element.value);
+                break;
+            case 'swing':
+                this.setSwing(element.value);
+                break;
+            case 'control':
+                this.handleControl(element.value);
+                break;
+        }
+    },
+    
+    handleControl(control) {
+        switch (control) {
+            case 'play':
+                this.togglePlay();
+                break;
+            case 'mode':
+                this.switchMode();
+                break;
+            case 'scales':
+                this.currentMode = 'scales';
+                this.createGrid();
+                this.updateInterface();
                 break;
             case 'clear':
                 this.clearSteps();
                 break;
-            case 'mode_change':
-                const newMode = this.currentMode === 'compose' ? 'perform' : 'compose';
-                this.setMode(newMode);
-                break;
-            case 'scale_access':
-                this.showScaleSelector();
-                break;
         }
     },
-
-    showScaleSelector() {
-        // Afficher sélecteur de gammes rapide
-        const scales = Object.keys(this.scales);
-        const currentIndex = scales.indexOf(this.currentScale);
-        const nextIndex = (currentIndex + 1) % scales.length;
-        const nextScale = scales[nextIndex];
-        
-        this.setScale(nextScale);
-        App.log(`Gamme suivante: ${this.scales[nextScale].name}`, 'info');
-    },
-
-    // ===== EVENT LISTENERS ===== //
-    setupEventListeners() {
-        // Mode selector
-        document.querySelectorAll('.mode-option').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.setMode(btn.dataset.mode);
-            });
-        });
-    },
-
-    // ===== PROGRAMMATION STEPS ===== //
+    
+    // ===== SÉQUENCEUR =====
     toggleStep(stepIndex) {
-        if (stepIndex < 0 || stepIndex >= 16) return;
-        
         this.steps[stepIndex] = !this.steps[stepIndex];
         this.updateStepDisplay(stepIndex);
-        this.saveConfig();
+        this.syncToMIDI();
+        this.updateInterface();
         
-        const action = this.steps[stepIndex] ? 'programmé' : 'effacé';
-        App.log(`Step ${stepIndex + 1} ${action}`, 'info');
-        
-        // Feedback MIDI
-        this.sendStepFeedback(stepIndex);
+        App.log(`Step ${stepIndex + 1} ${this.steps[stepIndex] ? 'ON' : 'OFF'}`, 'info');
     },
-
+    
     updateStepDisplay(stepIndex) {
-        const step = document.querySelector(`[data-step-index="${stepIndex}"]`);
-        if (!step) return;
-        
-        if (this.steps[stepIndex]) {
-            step.classList.add('programmed');
-            step.classList.add('programming');
-            setTimeout(() => step.classList.remove('programming'), 300);
-        } else {
-            step.classList.remove('programmed');
+        const stepPad = document.querySelector(`[data-step="${stepIndex}"]`);
+        if (stepPad) {
+            stepPad.classList.toggle('programmed', this.steps[stepIndex]);
         }
     },
-
-    // ===== GAMMES & NOTES ===== //
-    setScale(scaleKey) {
-        if (!this.scales[scaleKey]) return;
-        
-        this.currentScale = scaleKey;
-        this.updateScaleDisplay();
-        this.updateStepsNotes();
-        this.saveConfig();
-        
-        App.log(`Gamme changée: ${this.scales[scaleKey].name}`, 'info');
-    },
-
-    setOctave(octave) {
-        if (octave < 0 || octave > 8) return;
-        
-        this.currentOctave = octave;
-        this.updateStepsNotes();
-        this.saveConfig();
-        
-        App.log(`Octave changée: C${octave}`, 'info');
-    },
-
-    getStepNote(stepIndex) {
-        const scale = this.scales[this.currentScale];
-        if (!scale) return '';
-        
-        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        const scaleNote = scale.notes[stepIndex % scale.notes.length];
-        const octaveOffset = Math.floor(stepIndex / scale.notes.length);
-        const finalNote = scaleNote;
-        const finalOctave = this.currentOctave + octaveOffset;
-        
-        return `${noteNames[finalNote]}${finalOctave}`;
-    },
-
-    updateStepsNotes() {
-        document.querySelectorAll('.step').forEach((step, index) => {
-            const noteEl = step.querySelector('.step-note');
-            if (noteEl) {
-                noteEl.textContent = this.getStepNote(index);
-            }
-        });
-    },
-
-    updateScaleDisplay() {
-        const display = document.getElementById('scaleDisplay');
-        if (!display) return;
-        
-        const scale = this.scales[this.currentScale];
-        if (!scale) return;
-        
-        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        
-        display.innerHTML = `
-            <div style="margin-bottom: 10px; font-weight: 600;">${scale.name}</div>
-            <div class="scale-notes">
-                ${scale.notes.map((note, index) => `
-                    <span class="scale-note ${index === 0 ? 'root' : ''}">
-                        ${noteNames[note]}
-                    </span>
-                `).join('')}
-            </div>
-        `;
-    },
-
-    // ===== MODES ===== //
-    setMode(mode) {
-        this.currentMode = mode;
-        
-        // UI mode buttons
-        document.querySelectorAll('.mode-option').forEach(btn => {
-            if (btn.dataset.mode === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        
-        // Comportement interface
-        const content = document.querySelector('.sequencer-content');
-        if (content) {
-            if (mode === 'perform') {
-                content.classList.add('playing');
-            } else {
-                content.classList.remove('playing');
-            }
-        }
-        
-        App.log(`Mode ${mode} activé`, 'info');
-    },
-
-    // ===== PLAYHEAD ===== //
-    testPlayhead() {
-        if (this.isPlaying) return;
-        
-        this.isPlaying = true;
-        this.playhead = 0;
-        this.setMode('perform');
-        
-        const playInterval = setInterval(() => {
-            this.updatePlayhead();
-            this.playhead = (this.playhead + 1) % 16;
-            
-            // Arrêter après un cycle complet
-            if (this.playhead === 0) {
-                clearInterval(playInterval);
-                this.stopPlayhead();
-            }
-        }, 250);
-        
-    },
-
-    stopPlayhead() {
-        this.isPlaying = false;
-        this.setMode('compose');
-        
-        // Enlever playhead de tous les steps
-        document.querySelectorAll('.step').forEach(step => {
-            step.classList.remove('playhead');
-        });
-        
-    },
-
-    updatePlayhead() {
-        // Enlever playhead précédent
-        document.querySelectorAll('.step').forEach(step => {
-            step.classList.remove('playhead');
-        });
-        
-        // Ajouter playhead actuel
-        const currentStep = document.querySelector(`[data-step-index="${this.playhead}"]`);
-        if (currentStep) {
-            currentStep.classList.add('playhead');
-        }
-    },
-
-    // ===== ACTIONS ===== //
+    
     clearSteps() {
         this.steps.fill(false);
         this.updateInterface();
-        this.saveConfig();
-        
+        this.createGrid(); // Refresh grille
+        this.syncToMIDI();
+        App.log('🗑️ Steps effacés', 'info');
     },
-
-    randomSteps() {
-        for (let i = 0; i < 16; i++) {
-            this.steps[i] = Math.random() > 0.6;
-        }
+    
+    togglePlay() {
+        this.isPlaying = !this.isPlaying;
         this.updateInterface();
-        this.saveConfig();
+        App.log(`▶️ Séquenceur ${this.isPlaying ? 'ON' : 'OFF'}`, 'success');
+    },
+    
+    switchMode() {
+        this.currentMode = this.currentMode === 'steps' ? 'scales' : 'steps';
+        this.createGrid();
+        this.updateInterface();
+        App.log(`🔄 Mode: ${this.currentMode}`, 'info');
+    },
+    
+    // ===== PARAMÈTRES MUSICAUX =====
+    setScale(scaleKey) {
+        if (this.scales[scaleKey]) {
+            this.selectedScale = scaleKey;
+            this.createGrid(); // Refresh pour état actif
+            this.updateInterface();
+            App.log(`🎵 Scale: ${this.scales[scaleKey].name}`, 'info');
+        }
+    },
+    
+    setSwing(value) {
+        this.selectedSwing = value;
         
-        const programmedCount = this.steps.filter(Boolean).length;
-        App.log(`Steps aléatoires: ${programmedCount}/16 programmés`, 'info');
+        // Mettre à jour boutons swing section
+        document.querySelectorAll('.swing-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.swing) === value);
+        });
+        
+        // Mettre à jour grille si en mode scales
+        if (this.currentMode === 'scales') {
+            this.createGrid();
+        }
+        
+        this.updateInterface();
+        App.log(`🎶 Swing: ${value}%`, 'info');
     },
-
-    // ===== UTILITAIRES ===== //
-    padToMIDI(padNumber) {
-        const padIndex = padNumber - 1;
-        const visualRow = Math.floor(padIndex / 8);
-        const col = padIndex % 8;
-        return (7 - visualRow) * 8 + col;
+    
+    changeOctave(direction) {
+        this.octaveBase = Math.max(-2, Math.min(8, this.octaveBase + direction));
+        this.updateInterface();
+        App.log(`🎹 Octave: ${this.octaveBase}`, 'info');
     },
-
-    sendStepFeedback(stepIndex) {
+    
+    // ===== MISE À JOUR INTERFACE =====
+    updateInterface() {
+        // Panel feedback
+        const groupDisplay = document.getElementById('groupDisplay');
+        const scaleDisplay = document.getElementById('scaleDisplay');
+        const octaveDisplay = document.getElementById('octaveDisplay');
+        const modeDisplay = document.getElementById('modeDisplay');
+        const stepsDisplay = document.getElementById('stepsDisplay');
+        const swingDisplay = document.getElementById('swingDisplay');
+        
+        if (groupDisplay) groupDisplay.textContent = this.activeGroup || 'Aucun';
+        if (scaleDisplay) scaleDisplay.textContent = this.scales[this.selectedScale].name;
+        if (octaveDisplay) octaveDisplay.textContent = this.octaveBase;
+        if (modeDisplay) modeDisplay.textContent = this.currentMode;
+        if (stepsDisplay) stepsDisplay.textContent = `${this.steps.filter(Boolean).length}/16`;
+        if (swingDisplay) swingDisplay.textContent = `${this.selectedSwing}%`;
+    },
+    
+    // ===== MIDI =====
+    handleMIDIPreview(message) {
+        const { note, velocity } = message;
+        
+        if (velocity > 0) {
+            // Mettre à jour root note si pad pressé
+            this.rootNote = note;
+            
+            // Gestion steps si en mode steps
+            if (this.currentMode === 'steps') {
+                const stepIndex = this.getStepFromMIDI(note);
+                if (stepIndex !== -1) {
+                    this.toggleStep(stepIndex);
+                }
+            }
+        }
+    },
+    
+    getStepFromMIDI(midiNote) {
+        const padNumber = midiNote + 1; // MIDI → Pad number
+        return this.stepPads.indexOf(padNumber);
+    },
+    
+    syncToMIDI() {
         if (!App.isConnected() || typeof MIDI === 'undefined') return;
         
-        const padNumber = this.stepPads[stepIndex];
-        const midiNote = this.padToMIDI(padNumber);
-        const isOn = this.steps[stepIndex];
-        
-        MIDI.setPadColor(midiNote, isOn ? 'RED' : 'OFF');
-    },
-
-    syncToMIDI() {
-        this.steps.forEach((isOn, index) => {
-            if (isOn) {
-                this.sendStepFeedback(index);
-            }
+        this.stepPads.forEach((padNumber, index) => {
+            const midiNote = padNumber - 1;
+            const color = this.steps[index] ? 'RED' : 'OFF';
+            MIDI.setPadColor(midiNote, color);
         });
-            },
-
-    updateInterface() {
-        this.steps.forEach((_, index) => {
-            this.updateStepDisplay(index);
-        });
-        
-        this.updateStepsNotes();
-        this.updateScaleDisplay();
     },
-
-    // ===== PREVIEW MIDI ===== //
-    handleMIDIPreview(message) {
-        const { status, note, velocity } = message;
+    
+    // ===== ACTIVATION DEPUIS PADS =====
+    activateFromPads(groupId) {
+        this.activeGroup = groupId;
+        this.createControlPanel(); // Refresh panel droite
+        this.updateInterface();
         
-        // Vérifier si c'est un pad du groupe 3
-        const stepIndex = this.getStepFromMIDI(note);
-        if (stepIndex !== -1 && velocity > 0) {
-            this.toggleStep(stepIndex);
-            App.log(`Step ${stepIndex + 1} toggleé via MIDI`, 'info');
-        }
-        
-        // Vérifier contrôles sequencer (pads 29-32)
-        if (velocity > 0) {
-            const controlFunction = this.getControlFromMIDI(note);
-            if (controlFunction) {
-                this.executeControlFunction(controlFunction);
-            }
-        }
+        App.log(`🎹 Séquenceur activé groupe ${groupId}`, 'success');
     },
-
-    getStepFromMIDI(midiNote) {
-        for (let i = 0; i < 16; i++) {
-            const padNumber = this.stepPads[i];
-            const stepMidiNote = this.padToMIDI(padNumber);
-            if (stepMidiNote === midiNote) {
-                return i;
-            }
-        }
-        return -1;
-    },
-
-    getControlFromMIDI(midiNote) {
-        const controlMidiNote = this.padToMIDI(29 + Object.keys(this.controlPads).findIndex(key => 
-            this.padToMIDI(this.controlPads[key]) === midiNote
-        ));
-        
-        for (const [func, padNumber] of Object.entries(this.controlPads)) {
-            if (this.padToMIDI(padNumber) === midiNote) {
-                return func;
-            }
-        }
-        return null;
-    },
-
-    // ===== CONFIGURATION ===== //
+    
+    // ===== CONFIGURATION =====
     saveConfig() {
-        const config = {
-            scale: this.currentScale,
-            octave: this.currentOctave,
-            mode: this.currentMode,
-            steps: [...this.steps]
-        };
-        
-        App.updateConfig('sequencer', config);
+        App.updateConfig('sequencer', {
+            selectedScale: this.selectedScale,
+            octaveBase: this.octaveBase,
+            selectedSwing: this.selectedSwing,
+            steps: [...this.steps],
+            currentMode: this.currentMode,
+            activeGroup: this.activeGroup
+        });
     },
-
+    
     loadConfig(config) {
         if (config.sequencer) {
             const seq = config.sequencer;
-            
-            if (seq.scale) this.currentScale = seq.scale;
-            if (seq.octave !== undefined) this.currentOctave = seq.octave;
-            if (seq.mode) this.currentMode = seq.mode;
-            if (seq.steps) this.steps = [...seq.steps];
+            this.selectedScale = seq.selectedScale || 'major';
+            this.octaveBase = seq.octaveBase || 0;
+            this.selectedSwing = seq.selectedSwing || 50;
+            this.steps = seq.steps || Array(16).fill(false);
+            this.currentMode = seq.currentMode || 'steps';
+            this.activeGroup = seq.activeGroup || null;
             
             if (this.isInitialized) {
+                this.createControlPanel();
                 this.updateInterface();
+                this.createGrid();
             }
         }
-    },
-
-    getConfig() {
-        return {
-            scale: this.currentScale,
-            octave: this.currentOctave,
-            mode: this.currentMode,
-            steps: [...this.steps],
-            stepPads: [...this.stepPads],
-            controlPads: { ...this.controlPads }
-        };
     }
 };
 
-// ===== EVENT LISTENERS ===== //
+// ===== ÉVÉNEMENTS GLOBAUX =====
 window.addEventListener('config-changed', (event) => {
-    if (event.detail.sequencer) {
-        Sequencer.loadConfig(event.detail);
-    }
-});
-
-// Gestion MIDI globale
-window.addEventListener('midi-message', (event) => {
-    Sequencer.handleMIDIPreview(event.detail);
+    Sequencer.loadConfig(event.detail);
 });

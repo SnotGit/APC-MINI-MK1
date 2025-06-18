@@ -1,518 +1,325 @@
-/* ===== SEQUENCER CSS - APC MINI MK1 CONFIGURATOR ===== */
+/* ===== SEQUENCEUR CSS ===== */
 
-/* ===== LAYOUT SEQUENCER ===== */
+/* Layout principal 2 colonnes */
 .sequencer-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
     height: 100%;
-    padding: 20px;
+    padding: 16px;
 }
 
-.sequencer-section {
+/* ===== COLONNE GAUCHE : CONTRÔLES ===== */
+.sequencer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Grille 4x4 */
+.sequencer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
+    border-radius: 8px;
+}
+
+/* Pads de la grille */
+.sequencer-pad {
+    width: 100%;
+    height: 60px;
     background: #2a2a2a;
     border: 2px solid #444;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* ===== STEP SEQUENCER GRID ===== */
-.steps-section {
-    flex: 1;
-}
-
-.steps-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #5aa3d0;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #444;
-}
-
-.steps-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 60px);
-    gap: 8px;
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 8px;
-    border: 2px solid #333;
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
-}
-
-/* ===== STEPS INDIVIDUELS ===== */
-.step {
-    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    border: 2px solid #444;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    border-radius: 6px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    color: #e0e0e0;
+    cursor: pointer;
+    transition: all 0.2s ease;
     position: relative;
-    user-select: none;
 }
 
-.step:hover {
-    transform: scale(1.05);
-    border-color: #5aa3d0;
-    box-shadow: 0 0 15px rgba(90, 163, 208, 0.3);
-}
-
-.step.programmed {
-    background: linear-gradient(145deg, #7c4a4a, #5a2d2d);
-    border-color: #dd7f7f;
-    color: #ffffff;
-    animation: stepProgrammed 0.3s ease;
-}
-
-.step.programming {
-    animation: stepProgramming 0.3s ease;
-}
-
-.step.playhead {
-    background: linear-gradient(145deg, #ffffff, #e0e0e0);
-    border-color: #ffffff;
-    color: #000000;
-    animation: playheadBeat 0.5s ease infinite alternate;
-    z-index: 10;
-}
-
-.step-number {
-    font-weight: bold;
-    font-size: 12px;
-}
-
-.step-pad {
-    font-size: 9px;
-    opacity: 0.7;
-    margin-top: 2px;
-}
-
-.step-note {
-    font-size: 8px;
-    opacity: 0.6;
-    margin-top: 1px;
-}
-
-/* ===== CONTRÔLES SEQUENCER ===== */
-.controls-section {
-    flex: 0 0 auto;
-}
-
-.controls-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #5aa3d0;
-    margin-bottom: 15px;
-}
-
-.sequencer-controls {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.control-pad {
-    background: linear-gradient(145deg, #4a4a3a, #3a3a2a);
-    border: 2px solid #666;
-    border-radius: 8px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: #e0e0e0;
-}
-
-.control-pad:hover {
-    transform: translateY(-2px);
-    border-color: #5aa3d0;
-    box-shadow: 0 4px 15px rgba(90, 163, 208, 0.3);
-}
-
-.control-pad.active {
-    background: linear-gradient(145deg, #5aa3d0, #4a93c0);
-    border-color: #ffffff;
-    color: #ffffff;
-}
-
-.pad-number {
-    font-size: 14px;
-    font-weight: bold;
-    opacity: 0.8;
-}
-
-.pad-function {
-    font-size: 11px;
-    text-align: center;
-    line-height: 1.2;
-}
-
-/* ===== CONFIGURATION SEQUENCER ===== */
-.config-section {
-    flex: 0 0 auto;
-}
-
-.config-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #5aa3d0;
-    margin-bottom: 15px;
-}
-
-.sequencer-controls-panel {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.control-group {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 15px;
-}
-
-.control-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 10px;
-}
-
-/* ===== MODE SELECTOR ===== */
-.mode-selector {
-    display: flex;
-    gap: 10px;
-}
-
-.mode-option {
-    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 12px;
-    color: #e0e0e0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex: 1;
-    text-align: center;
-}
-
-.mode-option:hover {
-    border-color: #5aa3d0;
-    color: #5aa3d0;
-}
-
-.mode-option.active {
-    background: linear-gradient(145deg, #4a6a6a, #3a5a5a);
-    border-color: #5aa3d0;
-    color: #5aa3d0;
-}
-
-/* ===== ACTION BUTTONS ===== */
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.seq-btn {
-    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 12px;
-    color: #e0e0e0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.seq-btn:hover {
-    border-color: #5aa3d0;
-    color: #5aa3d0;
+.sequencer-pad:hover {
+    border-color: #666;
     transform: translateY(-1px);
 }
 
-.seq-btn.primary {
-    background: linear-gradient(145deg, #4a6a6a, #3a5a5a);
+.pad-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* ===== TYPES DE PADS ===== */
+
+/* Step Pads (Mode Steps) */
+.step-pad {
+    background: #2a2a2a;
+}
+
+.step-pad.programmed {
+    background: #F44336;
+    border-color: #F44336;
+}
+
+.step-pad.programmed .pad-label {
+    color: white;
+}
+
+/* Scale Pads (Vert quand actif) */
+.scale-pad.active {
+    background: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.scale-pad.active .pad-label {
+    color: white;
+}
+
+/* Swing Pads (Jaune quand actif) */
+.swing-pad.active {
+    background: #FFC107;
+    border-color: #FFC107;
+}
+
+.swing-pad.active .pad-label {
+    color: #333;
+}
+
+/* Control Pads */
+.control-pad {
+    background: #3a3a3a;
+}
+
+.control-pad.active {
+    background: #5aa3d0;
     border-color: #5aa3d0;
-    color: #5aa3d0;
 }
 
-.seq-btn.danger {
-    background: linear-gradient(145deg, #6a4a4a, #5a3a3a);
-    border-color: #dd7f7f;
-    color: #dd7f7f;
+.control-pad.active .pad-label {
+    color: white;
 }
 
-.seq-btn.danger:hover {
-    border-color: #ff9f9f;
-    color: #ff9f9f;
-}
-
-/* ===== SCALE INFO ===== */
-.scale-info {
-    background: #1a1a1a;
-    border: 1px solid #333;
+/* ===== SECTION SWING ===== */
+.swing-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
     border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
+    padding: 16px;
 }
 
-.scale-info-title {
+.swing-title {
     font-size: 12px;
     font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 10px;
+    color: #999;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.scale-notes {
+.swing-buttons {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
 }
 
-.scale-note {
-    background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
-    border: 1px solid #666;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 10px;
+.swing-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: #3a3a3a;
+    border: 2px solid #555;
+    border-radius: 6px;
     color: #e0e0e0;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.scale-note.root {
-    background: linear-gradient(145deg, #5aa3d0, #4a93c0);
-    border-color: #ffffff;
-    color: #ffffff;
-    font-weight: bold;
+.swing-btn:hover {
+    background: #4a4a4a;
+    border-color: #666;
 }
 
-/* ===== MAPPING DISPLAY ===== */
-.group-mapping {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 15px;
+.swing-btn.active {
+    background: #FFC107;
+    border-color: #FFC107;
+    color: #333;
 }
 
-.mapping-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 10px;
-}
-
-.mapping-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 40px);
-    gap: 4px;
-    background: #0a0a0a;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #222;
-}
-
-.mapping-pad {
-    background: linear-gradient(145deg, #2a2a3a, #1a1a2a);
-    border: 1px solid #444;
-    border-radius: 4px;
+/* ===== COLONNE DROITE : FEEDBACK ===== */
+.sequencer-feedback {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+}
+
+/* Panel principal */
+.feedback-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.feedback-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5aa3d0;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.feedback-separator {
+    height: 1px;
+    background: #555;
+    margin: 12px 0;
+}
+
+.feedback-row {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    font-size: 9px;
+    margin-bottom: 12px;
+    font-size: 12px;
     color: #e0e0e0;
 }
 
-.mapping-pad.sequencer {
-    border-color: #5aa3d0;
+.feedback-value {
+    padding: 4px 8px;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    min-width: 60px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Contrôles octave */
+.octave-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.octave-btn {
+    width: 24px;
+    height: 24px;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #e0e0e0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octave-btn:hover {
+    background: #4a4a4a;
+    border-color: #666;
+}
+
+.octave-value {
+    padding: 4px 8px;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    min-width: 40px;
+    text-align: center;
+    font-weight: 600;
+    color: #e0e0e0;
+}
+
+/* Panel status */
+.status-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.status-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.status-info > div {
+    font-size: 11px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+
+.status-info span {
     color: #5aa3d0;
-}
-
-.mapping-pad .pad-number {
-    font-size: 10px;
-    font-weight: bold;
-}
-
-.mapping-pad .step-number {
-    font-size: 8px;
-    opacity: 0.7;
-}
-
-/* ===== PLAYING MODE ===== */
-.sequencer-content.playing .step.programmed {
-    animation: playingStep 2s ease-in-out infinite;
-}
-
-.sequencer-content.playing .control-pad[data-function="play_stop"] {
-    background: linear-gradient(145deg, #7c4a4a, #5a2d2d);
-    border-color: #dd7f7f;
-    color: #ffffff;
+    font-weight: 600;
 }
 
 /* ===== ANIMATIONS ===== */
-@keyframes stepProgrammed {
+.sequencer-pad.programmed {
+    animation: pulse-red 0.3s ease;
+}
+
+@keyframes pulse-red {
     0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
-@keyframes stepProgramming {
-    0% { 
-        background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-        border-color: #444;
-    }
-    50% { 
-        background: linear-gradient(145deg, #7c4a4a, #5a2d2d);
-        border-color: #dd7f7f;
-    }
-    100% { 
-        background: linear-gradient(145deg, #7c4a4a, #5a2d2d);
-        border-color: #dd7f7f;
-    }
+.sequencer-pad.active {
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
 }
 
-@keyframes playheadBeat {
-    0% { 
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        transform: scale(1);
-    }
-    100% { 
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        transform: scale(1.05);
-    }
-}
-
-@keyframes playingStep {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* ===== RESPONSIVE SEQUENCER ===== */
-@media (max-width: 1200px) {
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
     .sequencer-layout {
-        gap: 20px;
-        padding: 15px;
-    }
-    
-    .steps-grid {
-        grid-template-rows: repeat(4, 50px);
-        gap: 6px;
-        padding: 15px;
-    }
-    
-    .step {
-        font-size: 10px;
-    }
-    
-    .sequencer-controls {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .sequencer-controls-panel {
         grid-template-columns: 1fr;
-        gap: 15px;
+        grid-template-rows: auto auto;
+    }
+    
+    .sequencer-feedback {
+        order: -1;
     }
 }
 
 @media (max-width: 768px) {
-    .steps-grid {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(4, 40px);
+    .sequencer-grid {
+        gap: 2px;
+        padding: 12px;
+    }
+    
+    .sequencer-pad {
+        height: 50px;
+    }
+    
+    .pad-label {
+        font-size: 10px;
+    }
+    
+    .swing-buttons {
+        flex-direction: column;
         gap: 4px;
-        padding: 10px;
     }
     
-    .step {
-        font-size: 9px;
-        border-radius: 6px;
+    .feedback-panel,
+    .status-panel {
+        padding: 12px;
     }
-    
-    .step-number {
-        font-size: 10px;
-    }
-    
-    .step-pad, .step-note {
-        font-size: 7px;
-    }
-    
-    .control-pad {
-        padding: 10px;
-        gap: 6px;
-    }
-    
-    .pad-number {
-        font-size: 12px;
-    }
-    
-    .pad-function {
-        font-size: 10px;
-    }
-    
-    .action-buttons {
-        justify-content: center;
-    }
-    
-    .mapping-grid {
-        grid-template-rows: repeat(4, 30px);
-        gap: 3px;
-        padding: 8px;
-    }
-    
-    .mapping-pad {
-        font-size: 8px;
-    }
-}
-
-/* ===== UTILITAIRES SEQUENCER ===== */
-.step.disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.step.disabled:hover {
-    transform: none;
-    border-color: #444;
-    box-shadow: none;
-}
-
-.sequencer-section.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.sequencer-section.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30px;
-    height: 30px;
-    border: 3px solid #444;
-    border-top: 3px solid #5aa3d0;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
