@@ -1,4 +1,4 @@
-// ===== GÉNÉRATION SCRIPT PYTHON ===== //
+// ===== EXPORT SIMPLE - APC MINI MK1 CONFIGURATOR ===== //
 
 const Export = {
     
@@ -10,212 +10,214 @@ const Export = {
         if (this.isInitialized) return;
         
         this.createInterface();
-        this.updateSummary();
         this.isInitialized = true;
         
         App.log('✅ Module Export initialisé', 'info');
     },
 
-    // ===== INTERFACE ===== //
+    // ===== INTERFACE AVEC CADRE ===== //
     createInterface() {
         const container = document.querySelector('.export-content');
         if (!container) return;
         
         container.innerHTML = `
-            <!-- Résumé Configuration -->
-            <div class="export-section">
-                <h3 class="export-section-title">Résumé Configuration</h3>
-                <div class="config-summary" id="configSummary">
-                    <!-- Généré par updateSummary() -->
-                </div>
-            </div>
-            
-            <!-- Export -->
-            <div class="export-section">
-                <h3 class="export-section-title">Génération Script Python</h3>
-                <button class="export-button" onclick="Export.generateScript()">
-                    📦 Générer Script APC Mini Custom
-                </button>
-                <div class="export-status" id="exportStatus"></div>
-            </div>
-            
-            <!-- Instructions -->
-            <div class="export-section">
-                <h3 class="export-section-title">Installation Ableton Live</h3>
-                <div class="instructions-section">
-                    <div class="instructions-title">Étapes d'installation</div>
-                    <ol class="instructions-steps">
-                        <li data-step="1">
-                            Décompressez le fichier ZIP téléchargé
-                        </li>
-                        <li data-step="2">
-                            Copiez le dossier dans le répertoire Remote Scripts :
-                            <div class="instructions-path">
-                                <strong>Windows:</strong><br>
-                                C:\\ProgramData\\Ableton\\Live [version]\\Resources\\MIDI Remote Scripts\\
-                            </div>
-                            <div class="instructions-path">
-                                <strong>Mac:</strong><br>
-                                /Applications/Ableton Live [version].app/Contents/App-Resources/MIDI Remote Scripts/
-                            </div>
-                        </li>
-                        <li data-step="3">
-                            Redémarrez Ableton Live
-                        </li>
-                        <li data-step="4">
-                            Dans Préférences > Link/MIDI :
-                            <div class="instructions-path">
-                                Surface de contrôle: <strong>APC_Mini_Custom</strong><br>
-                                Entrée: <strong>APC MINI</strong><br>
-                                Sortie: <strong>APC MINI</strong>
-                            </div>
-                        </li>
-                        <li data-step="5">
-                            Fermez cette interface web et utilisez votre APC Mini !
-                        </li>
-                    </ol>
+            <div class="export-layout">
+                <div class="export-section">
+                    <div class="export-header">
+                        <h1 class="export-title">Téléchargement</h1>
+                    </div>
+                    
+                    <div class="export-content-area">
+                        <p class="export-description">
+                            Générez et téléchargez votre script APC Mini personnalisé<br>
+                            compatible avec Ableton Live 10/11/12
+                        </p>
+                        
+                        <button class="download-btn" onclick="Export.download()">
+                            📁 Script APC Mini
+                        </button>
+                        
+                        <div class="export-status" id="exportStatus"></div>
+                    </div>
+                    
+                    <div class="export-footer">
+                        <p class="export-info">
+                            Script Python + Instructions d'installation incluses
+                        </p>
+                    </div>
                 </div>
             </div>
         `;
     },
 
-    // ===== RÉSUMÉ CONFIGURATION ===== //
-    updateSummary() {
-        const summary = document.getElementById('configSummary');
-        if (!summary) return;
-        
-        const config = App.getConfig();
-        
-        // Compter pads configurés
-        const configuredPads = Object.values(config.pads || {}).filter(pad => pad.color).length;
-        
-        // Compter boutons configurés
-        const configuredButtons = Object.values(config.buttons || {}).filter(btn => btn.normal || btn.shift).length;
-        
-        // Compter steps séquenceur
-        const configuredSteps = (config.sequencer?.steps || []).filter(Boolean).length;
-        
-        summary.innerHTML = `
-            <div class="summary-card">
-                <div class="summary-title">Pads Configurés</div>
-                <div class="summary-content">
-                    <span class="summary-count">${configuredPads}</span>/64 pads avec couleur<br>
-                    Groupes 1, 2, 4 configurables<br>
-                    Groupe 3 = Step Sequencer
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div class="summary-title">Boutons Configurés</div>
-                <div class="summary-content">
-                    <span class="summary-count">${configuredButtons}</span>/8 boutons (82-89)<br>
-                    Mode Normal + Shift<br>
-                    <span class="summary-count">${configuredButtons * 2}</span> actions totales
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div class="summary-title">Step Sequencer</div>
-                <div class="summary-content">
-                    Gamme: <span class="summary-count">${config.sequencer?.scale || 'C_Major'}</span><br>
-                    Octave: <span class="summary-count">C${config.sequencer?.octave || 3}</span><br>
-                    Steps: <span class="summary-count">${configuredSteps}</span>/16 programmés
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div class="summary-title">Script Python</div>
-                <div class="summary-content">
-                    Compatible: <span class="summary-count">Live 10/11/12</span><br>
-                    Feedback LED bidirectionnel<br>
-                    Script complet standalone
-                </div>
-            </div>
-        `;
-    },
-
-    // ===== GÉNÉRATION SCRIPT ===== //
-    async generateScript() {
-        const button = document.querySelector('.export-button');
-        const status = document.getElementById('exportStatus');
-        
-        if (button) {
-            button.disabled = true;
-            button.textContent = '⏳ Génération en cours...';
-        }
-        
+    // ===== TÉLÉCHARGEMENT ZIP ===== //
+    async download() {
         try {
-            // Mettre à jour résumé
-            this.updateSummary();
-            
-            // Simuler génération (à compléter étape 5)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Pour l'instant, juste un placeholder
-            this.downloadPlaceholder();
-            
-            if (status) {
-                status.className = 'export-status success';
-                status.textContent = '✅ Script généré avec succès ! Fichier téléchargé.';
+            // Charger JSZip si nécessaire
+            if (typeof JSZip === 'undefined') {
+                await this.loadJSZip();
             }
             
-            App.log('📦 Script Python généré et téléchargé', 'success');
+            const zip = new JSZip();
+            const config = App.getConfig();
+            
+            // Ajouter fichiers au ZIP
+            zip.file('__init__.py', this.generateInit());
+            zip.file('APC_Mini_Custom.py', this.generateScript(config));
+            zip.file('INSTALLATION.txt', this.generateInstructions());
+            
+            // Générer et télécharger ZIP
+            const content = await zip.generateAsync({type: 'blob'});
+            this.downloadFile(content, 'APC_Mini_Custom.zip');
+            
+            App.log('📦 Script téléchargé avec succès', 'success');
             
         } catch (error) {
-            if (status) {
-                status.className = 'export-status error';
-                status.textContent = `❌ Erreur génération: ${error.message}`;
-            }
-            
-            App.log(`❌ Erreur export: ${error.message}`, 'error');
-        } finally {
-            if (button) {
-                button.disabled = false;
-                button.textContent = '📦 Générer Script APC Mini Custom';
-            }
+            App.log(`❌ Erreur téléchargement: ${error.message}`, 'error');
         }
     },
 
-    // ===== PLACEHOLDER DOWNLOAD ===== //
-    downloadPlaceholder() {
-        const config = App.getConfig();
-        
-        const placeholderContent = `# APC Mini MK1 Custom Script
+    // ===== GÉNÉRATION FICHIERS ===== //
+    generateInit() {
+        return `# APC Mini MK1 Custom Script
+from .APC_Mini_Custom import APC_Mini_Custom
+__all__ = ['APC_Mini_Custom']
+`;
+    },
+
+    generateScript(config) {
+        return `# APC Mini MK1 Custom Script
 # Generated by APC Mini Configurator
 # ${new Date().toLocaleString()}
 
-# Configuration:
-# - Pads: ${Object.keys(config.pads || {}).length} configurés
-# - Boutons: ${Object.keys(config.buttons || {}).length} configurés  
-# - Sequencer: ${config.sequencer?.scale || 'C_Major'} @ C${config.sequencer?.octave || 3}
+import Live
+from _Framework.ControlSurface import ControlSurface
+from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_CC_TYPE
+from _Framework.ButtonElement import ButtonElement
+from _Framework.EncoderElement import EncoderElement
+from _Framework.SessionComponent import SessionComponent
+from _Framework.TransportComponent import TransportComponent
+from _Framework.MixerComponent import MixerComponent
 
-# TODO: Génération complète à l'étape 5
-print("APC Mini Custom Script - Placeholder")
+class APC_Mini_Custom(ControlSurface):
+    
+    def __init__(self, c_instance):
+        super(APC_Mini_Custom, self).__init__(c_instance)
+        
+        with self.component_guard():
+            self._setup_transport()
+            self._setup_mixer()
+            self._setup_session()
+            self._setup_custom_buttons()
+    
+    def _setup_transport(self):
+        self._transport = TransportComponent()
+    
+    def _setup_mixer(self):
+        self._mixer = MixerComponent(8)
+        
+        # Faders (48-56)
+        for i in range(8):
+            strip = self._mixer.channel_strip(i)
+            fader = EncoderElement(MIDI_CC_TYPE, 0, 48 + i, Live.MidiMap.MapMode.absolute)
+            strip.set_volume_control(fader)
+        
+        # Track select + ARM (64-71)
+        for i in range(8):
+            button = ButtonElement(True, MIDI_NOTE_TYPE, 0, 64 + i)
+            strip = self._mixer.channel_strip(i)
+            strip.set_select_button(button)
+            strip.set_arm_button(button)
+    
+    def _setup_session(self):
+        self._session = SessionComponent(8, 8)
+        self._session.set_offsets(0, 0)
+        
+        # Pads (0-63)
+        for row in range(8):
+            for col in range(8):
+                note = (7 - row) * 8 + col
+                button = ButtonElement(True, MIDI_NOTE_TYPE, 0, note)
+                button.set_on_off_values(1, 0)
+                self._session.scene(row).clip_slot(col).set_launch_button(button)
+    
+    def _setup_custom_buttons(self):
+        # Boutons personnalisés (82-89)
+        buttons_config = ${JSON.stringify(config.buttons || {}, null, 8)}
+        
+        for note_str, button_config in buttons_config.items():
+            note = int(note_str)
+            button = ButtonElement(True, MIDI_NOTE_TYPE, 0, note)
+            
+            # Actions selon configuration
+            normal_action = button_config.get('normal')
+            if normal_action == 'play_stop':
+                self._transport.set_play_button(button)
+            elif normal_action == 'record':
+                self._transport.set_record_button(button)
+            elif normal_action == 'stop_all':
+                self._transport.set_stop_button(button)
+            elif normal_action == 'tap_tempo':
+                self._transport.set_tap_tempo_button(button)
+    
+    def disconnect(self):
+        super(APC_Mini_Custom, self).disconnect()
 `;
-        
-        // Créer et télécharger
-        const blob = new Blob([placeholderContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        
+    },
+
+    generateInstructions() {
+        return `APC Mini MK1 Custom Script - Instructions d'installation
+=========================================================
+
+ÉTAPES D'INSTALLATION :
+
+1. Fermez Ableton Live s'il est ouvert
+
+2. Copiez le dossier APC_Mini_Custom dans le répertoire Remote Scripts :
+
+   Windows:
+   C:\\ProgramData\\Ableton\\Live [version]\\Resources\\MIDI Remote Scripts\\
+   
+   Mac:
+   /Applications/Ableton Live [version].app/Contents/App-Resources/MIDI Remote Scripts/
+
+3. Redémarrez Ableton Live
+
+4. Dans Ableton Live, allez dans Préférences > Link/MIDI :
+   - Control Surface: APC_Mini_Custom
+   - Input: APC MINI
+   - Output: APC MINI
+
+5. Fermez cette interface web et utilisez votre APC Mini !
+
+NOTES :
+- Compatible Ableton Live 10/11/12
+- Le script gère automatiquement les couleurs LED
+- Les boutons 82-89 sont personnalisés selon votre configuration
+
+Support: Consultez la documentation Ableton pour plus d'aide.
+`;
+    },
+
+    // ===== UTILITAIRES ===== //
+    async loadJSZip() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    },
+
+    downloadFile(content, filename) {
         const a = document.createElement('a');
+        const url = URL.createObjectURL(content);
         a.href = url;
-        a.download = 'APC_Mini_Custom_placeholder.py';
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
         URL.revokeObjectURL(url);
-    },
-
-    // ===== ÉVÉNEMENTS ===== //
-    onConfigChange() {
-        if (this.isInitialized) {
-            this.updateSummary();
-        }
     }
 };
-
-// ===== EVENT LISTENERS ===== //
-window.addEventListener('config-changed', () => {
-    Export.onConfigChange();
-});

@@ -1,233 +1,176 @@
+/* ===== EXPORT CSS - APC MINI MK1 CONFIGURATOR ===== */
 
-/* ===== LAYOUT EXPORT ===== */
+/* ===== LAYOUT AVEC CADRE ===== */
 .export-layout {
     display: flex;
     flex-direction: column;
-    gap: 20px;
     height: 100%;
+    padding: 20px;
 }
 
-/* ===== CONTENU EXPORT ===== */
-.export-content {
+.export-section {
+    background: #1a1a1a;
+    border: 2px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    height: 100%;
-    overflow-y: auto;
 }
 
-/* ===== SECTIONS EXPORT ===== */
-.export-section {
-    background: #333;
-    border-radius: 8px;
-    padding: 20px;
-    border: 1px solid #444;
-}
-
-.export-section-title {
-    color: #5aa3d0;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 8px;
-}
-
-/* ===== RÉSUMÉ CONFIGURATION ===== */
-.config-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.summary-card {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 15px;
-}
-
-.summary-title {
-    color: #5aa3d0;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-}
-
-.summary-content {
-    font-size: 11px;
-    color: #e0e0e0;
-    line-height: 1.4;
-}
-
-.summary-count {
-    color: #2ecc71;
-    font-weight: 600;
-}
-
-/* ===== BOUTON EXPORT ===== */
-.export-button {
-    background: linear-gradient(145deg, #2ecc71, #27ae60);
-    color: #fff;
-    border: 2px solid #2ecc71;
-    padding: 15px 30px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    text-align: center;
-    margin: 20px auto;
-    display: block;
-}
-
-.export-button:hover {
-    background: linear-gradient(145deg, #27ae60, #229954);
-    border-color: #27ae60;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-}
-
-.export-button:disabled {
-    background: #666;
-    border-color: #666;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* ===== INSTRUCTIONS ===== */
-.instructions-section {
+/* ===== HEADER TÉLÉCHARGEMENT ===== */
+.export-header {
     background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
+    border-radius: 10px 10px 0 0;
     padding: 20px;
-}
-
-.instructions-title {
-    color: #5aa3d0;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-.instructions-steps {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.instructions-steps li {
-    font-size: 12px;
-    color: #e0e0e0;
-    margin-bottom: 12px;
-    padding-left: 25px;
+    text-align: center;
     position: relative;
-    line-height: 1.4;
 }
 
-.instructions-steps li::before {
-    content: attr(data-step);
+.export-header::after {
+    content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 18px;
-    height: 18px;
-    background: #5aa3d0;
-    color: #000;
-    border-radius: 50%;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #2a2a2a 20%, #2a2a2a 80%, transparent);
+}
+
+.export-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #5aa3d0;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== CONTENU PRINCIPAL ===== */
+.export-content-area {
+    flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.instructions-path {
-    background: #333;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 11px;
-    margin: 5px 0;
-    border-left: 3px solid #5aa3d0;
-}
-
-/* ===== STATUS EXPORT ===== */
-.export-status {
-    background: #2a3a2a;
-    border: 1px solid #4a6a4a;
-    border-radius: 6px;
-    padding: 15px;
-    margin-top: 15px;
-    color: #2ecc71;
-    font-size: 12px;
+    padding: 40px;
     text-align: center;
-    display: none;
+}
+
+.export-description {
+    font-size: 16px;
+    color: #e0e0e0;
+    margin-bottom: 30px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+/* ===== BOUTON TÉLÉCHARGEMENT ===== */
+.download-btn {
+    background: linear-gradient(145deg, #5aa3d0, #4a93c0);
+    border: 2px solid #5aa3d0;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+    justify-content: center;
+}
+
+.download-btn:hover {
+    background: linear-gradient(145deg, #6ab3e0, #5aa3d0);
+    border-color: #6ab3e0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(90, 163, 208, 0.4);
+}
+
+.download-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(90, 163, 208, 0.3);
+}
+
+/* ===== FOOTER AVEC INFOS ===== */
+.export-footer {
+    background: #1a1a1a;
+    border-radius: 0 0 10px 10px;
+    padding: 15px 20px;
+    text-align: center;
+    position: relative;
+}
+
+.export-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #333 20%, #333 80%, transparent);
+}
+
+.export-info {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* ===== STATUS MESSAGE ===== */
+.export-status {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 20px;
+    transition: all 0.3s ease;
+    max-width: 400px;
 }
 
 .export-status.success {
-    display: block;
-    animation: fadeIn 0.5s ease;
+    background: linear-gradient(145deg, #4a6a4a, #3a5a3a);
+    border: 1px solid #5a7a5a;
+    color: #7fdd7f;
 }
 
 .export-status.error {
-    background: #3a2a2a;
-    border-color: #6a4a4a;
-    color: #e74c3c;
-    display: block;
+    background: linear-gradient(145deg, #6a4a4a, #5a3a3a);
+    border: 1px solid #7a5a5a;
+    color: #dd7f7f;
 }
 
-/* ===== PREVIEW CODE ===== */
-.code-preview {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 6px;
-    padding: 15px;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    color: #e0e0e0;
-    max-height: 200px;
-    overflow-y: auto;
-    line-height: 1.4;
-}
-
-.code-preview .comment {
-    color: #888;
-}
-
-.code-preview .keyword {
-    color: #5aa3d0;
-}
-
-.code-preview .string {
-    color: #2ecc71;
-}
-
-/* ===== RESPONSIVE EXPORT ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .config-summary {
-        grid-template-columns: 1fr;
-        gap: 10px;
+    .export-layout {
+        padding: 15px;
     }
     
-    .export-button {
+    .export-title {
+        font-size: 20px;
+    }
+    
+    .export-content-area {
+        padding: 30px 20px;
+    }
+    
+    .export-description {
         font-size: 14px;
-        padding: 12px 24px;
     }
     
-    .instructions-steps li {
+    .download-btn {
+        padding: 12px 25px;
+        font-size: 14px;
+        min-width: 200px;
+    }
+    
+    .export-info {
         font-size: 11px;
-        padding-left: 22px;
-    }
-    
-    .instructions-steps li::before {
-        width: 16px;
-        height: 16px;
-        font-size: 9px;
     }
 }
