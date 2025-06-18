@@ -13,23 +13,20 @@
 <body>
     <div class="container">
         
-        <!-- Header avec titre + boutons navigation -->
         <div class="header">
             <h1>AKAI APC MINI MK1</h1>
             
             <div class="header-buttons">
-                <button class="header-btn active" onclick="App.switchView('pads')">Pad</button>
+                <button class="header-btn" onclick="App.switchView('pads')">Pad</button>
                 <button class="header-btn" onclick="App.switchView('buttons')">boutons</button>
                 <button class="header-btn" onclick="App.switchView('sequencer')">sequenceur</button>
                 <button class="header-btn" onclick="App.switchView('export')">export</button>
-                <button class="header-btn" onclick="App.switchView('connexion')">connexion</button>
+                <button class="header-btn">connexion</button>
             </div>
         </div>
 
-        <!-- Layout principal horizontal -->
         <div class="main-layout">
             
-            <!-- Container dynamique (gauche) -->
             <div class="dynamic-container">
                 
                 <!-- Vue Pads -->
@@ -59,25 +56,18 @@
                         <!-- Généré par export.js -->
                     </div>
                 </div>
-                
-                <!-- Vue Connexion -->
-                <div id="view-connexion" class="view-content">
-                    <div class="connexion-content">
-                        <div class="midi-status">
-                            <div class="status-dot" id="statusDot"></div>
-                            <span class="status-text" id="statusText">Déconnecté</span>
-                            <button id="connectBtn" class="btn btn-primary">CONNEXION</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             
-            <!-- Panel fixe droite -->
+         
             <div class="control-panel">
                 
                 <!-- Section config (haut) -->
                 <div class="config-section">
                     <div id="configContent">
+
+                <!-- MANQUE BOUTONS PAD ET GROUPE -->
+
+                        
                         <div class="placeholder-text">
                             Sélectionnez un élément pour le configurer
                         </div>
@@ -89,7 +79,7 @@
                     <div class="console-content" id="console">
                         <div class="log-entry system">
                             <span class="timestamp">[Init]</span>
-                            Interface APC Mini MK1 chargée
+                            Interface APC Mini MK1 
                         </div>
                     </div>
                 </div>
@@ -105,10 +95,5 @@
     <script src="js/sequencer.js"></script>
     <script src="js/export.js"></script>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            App.init();
-        });
-    </script>
 </body>
 </html>
