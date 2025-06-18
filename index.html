@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,14 +11,15 @@
     <link rel="stylesheet" href="css/sequencer.css">
     <link rel="stylesheet" href="css/export.css">
 </head>
+
 <body>
     <div class="container">
-        
+
         <div class="header">
             <h1>AKAI APC MINI MK1</h1>
-            
+
             <div class="header-buttons">
-                <button class="header-btn" onclick="App.switchView('pads')">Pad</button>
+                <button class="header-btn active" onclick="App.switchView('pads')">Pad</button>
                 <button class="header-btn" onclick="App.switchView('buttons')">boutons</button>
                 <button class="header-btn" onclick="App.switchView('sequencer')">sequenceur</button>
                 <button class="header-btn" onclick="App.switchView('export')">export</button>
@@ -26,30 +28,30 @@
         </div>
 
         <div class="main-layout">
-            
+
             <div class="dynamic-container">
-                
+
                 <!-- Vue Pads -->
                 <div id="view-pads" class="view-content active">
                     <div class="pad-grid" id="padGrid">
                         <!-- Généré par pads.js -->
                     </div>
                 </div>
-                
+
                 <!-- Vue Boutons -->
                 <div id="view-buttons" class="view-content">
                     <div class="buttons-content">
                         <!-- Généré par buttons.js -->
                     </div>
                 </div>
-                
+
                 <!-- Vue Sequencer -->
                 <div id="view-sequencer" class="view-content">
                     <div class="sequencer-content">
                         <!-- Généré par sequencer.js -->
                     </div>
                 </div>
-                
+
                 <!-- Vue Export -->
                 <div id="view-export" class="view-content">
                     <div class="export-content">
@@ -57,29 +59,32 @@
                     </div>
                 </div>
             </div>
-            
-         
+
+
             <div class="control-panel">
-                
+
                 <!-- Section config (haut) -->
                 <div class="config-section">
+                    <div class="config-mode-selector">
+                        <button class="mode-btn active" data-mode="pad">pad</button>
+                        <button class="mode-btn" data-mode="groupe">Groupe</button>
+                    </div>
+
+
                     <div id="configContent">
 
-                <!-- MANQUE BOUTONS PAD ET GROUPE -->
-
-                        
                         <div class="placeholder-text">
                             Sélectionnez un élément pour le configurer
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Console (bas) -->
                 <div class="console">
                     <div class="console-content" id="console">
                         <div class="log-entry system">
                             <span class="timestamp">[Init]</span>
-                            Interface APC Mini MK1 
+                            Console APC Mini MK1
                         </div>
                     </div>
                 </div>
@@ -94,6 +99,7 @@
     <script src="js/buttons.js"></script>
     <script src="js/sequencer.js"></script>
     <script src="js/export.js"></script>
-    
+
 </body>
+
 </html>

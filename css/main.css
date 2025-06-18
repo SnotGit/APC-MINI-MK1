@@ -128,6 +128,45 @@ body {
     overflow-y: auto;
 }
 
+.config-mode-selector {
+    display: flex;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #999;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+}
+
+.mode-btn.active {
+    background: #5aa3d0;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(90, 163, 208, 0.3);
+}
+
+.mode-btn.active:hover {
+    background: #4a93c0;
+    color: #fff;
+}
+
 .placeholder-text {
     text-align: center;
     color: #e0e0e0;
@@ -172,47 +211,6 @@ body {
 
 .timestamp { 
     color: #888; 
-}
-
-/* ===== CONNEXION VIEW ===== */
-.connexion-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.midi-status {
-    text-align: center;
-    background: #333;
-    padding: 40px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.status-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #666;
-    transition: background-color 0.3s ease;
-}
-
-.status-dot.connected {
-    background: #2ecc71;
-}
-
-.status-text {
-    font-size: 16px;
-    color: #888;
-}
-
-.status-text.connected {
-    color: #2ecc71;
 }
 
 /* ===== BOUTONS ===== */
