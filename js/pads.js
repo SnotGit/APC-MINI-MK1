@@ -7,6 +7,7 @@ const Pads = {
     sequencerEnabled: false,
     isInitialized: false,
     
+    // ===== GROUPES DE PADS (NUMÉROS HUMAINS 1-64) =====
     groups: {
         1: { name: 'Bas-Gauche', pads: [1,2,3,4,9,10,11,12,17,18,19,20,25,26,27,28] },
         2: { name: 'Haut-Gauche', pads: [33,34,35,36,41,42,43,44,49,50,51,52,57,58,59,60] },
@@ -14,6 +15,7 @@ const Pads = {
         4: { name: 'Bas-Droite', pads: [5,6,7,8,13,14,15,16,21,22,23,24,29,30,31,32] }
     },
 
+    // ===== CONTRÔLES SÉQUENCEUR =====
     sequencerControls: {
         2: {
             pads: [25, 26, 27, 28],
@@ -38,20 +40,17 @@ const Pads = {
         this.showPadModeInterface();
         this.isInitialized = true;
         
-        // IMPORTANT: Charger config après initialisation complète
+        // Charger config après initialisation complète
         window.addEventListener('config-changed', this.handleConfigChanged.bind(this));
     },
 
     handleConfigChanged(event) {
         if (event.detail.pads) {
             this.loadConfig(event.detail);
-            // Mettre à jour interface si on est en mode groupes
-            if (this.currentMode === 'groups') {
-                this.updateSequencerOption();
-            }
         }
     },
 
+    // ===== CRÉATION GRILLE =====
     createPadGrid() {
         const grid = document.getElementById('padGrid');
         if (!grid) return;
@@ -92,6 +91,7 @@ const Pads = {
         return null;
     },
 
+    // ===== ÉVÉNEMENTS =====
     setupEvents() {
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -157,6 +157,7 @@ const Pads = {
         }
     },
 
+    // ===== APPLICATION COULEURS =====
     applyPadColor(color) {
         if (!this.selectedPad) return;
         
@@ -165,9 +166,8 @@ const Pads = {
         this.sendMIDIColor(this.selectedPad, color);
         this.saveConfig();
         
-        // DÉSÉLECTIONNER après attribution
         this.selectedPad = null;
-        this.updatePadVisuals(); // Refresh tous les pads pour enlever .selected
+        this.updatePadVisuals();
     },
 
     applyGroupColor(color) {
@@ -191,6 +191,7 @@ const Pads = {
         this.saveConfig();
     },
 
+    // ===== INTERFACES =====
     showPadModeInterface() {
         const configPanel = document.getElementById('configContent');
         if (!configPanel) return;
@@ -245,7 +246,6 @@ const Pads = {
         const label = document.querySelector('.sequencer-toggle');
         
         if (checkbox && label) {
-            // Mettre à jour l'état de la checkbox
             checkbox.checked = this.sequencerEnabled && (this.selectedGroup === 2 || this.selectedGroup === 3);
             
             if (this.selectedGroup === 2 || this.selectedGroup === 3) {
@@ -254,7 +254,6 @@ const Pads = {
             } else {
                 label.style.opacity = '0.5';
                 checkbox.disabled = true;
-                // Si groupe non compatible, désactiver le séquenceur
                 if (this.sequencerEnabled) {
                     this.sequencerEnabled = false;
                     checkbox.checked = false;
@@ -277,6 +276,12 @@ const Pads = {
                     }
                 });
             }
+            
+            // Notifier app.js avec le nouveau event
+            window.dispatchEvent(new CustomEvent('sequencer-group-activated', {
+                detail: { groupId: this.selectedGroup }
+            }));
+            
         } else if (!enabled && (this.selectedGroup === 2 || this.selectedGroup === 3)) {
             const controls = this.sequencerControls[this.selectedGroup];
             if (controls) {
@@ -286,11 +291,15 @@ const Pads = {
                     this.sendMIDIColor(pad, null);
                 });
             }
+            
+            // Notifier la désactivation
+            window.dispatchEvent(new CustomEvent('sequencer-deactivated'));
         }
         
         this.saveConfig();
     },
 
+    // ===== VISUELS =====
     updatePadVisual(padNumber) {
         const pad = document.querySelector(`[data-pad-number="${padNumber}"]`);
         if (!pad) return;
@@ -304,7 +313,7 @@ const Pads = {
         const color = this.padConfigs[padNumber].color;
         if (color) {
             pad.classList.add(`color-${color}`);
-            pad.classList.add('assigned'); // DÉSACTIVE LE HOVER
+            pad.classList.add('assigned');
         } else if (this.currentMode === 'groups' && this.selectedGroup && this.findPadGroup(padNumber) === this.selectedGroup) {
             pad.classList.add('group-highlight');
         }
@@ -331,35 +340,13 @@ const Pads = {
         }
     },
 
+    // ===== MIDI =====
     sendMIDIColor(padNumber, color) {
         if (!App.isConnected() || typeof MIDI === 'undefined') return;
         
         const midiNote = padNumber - 1;
         const colorMap = { green: 'GREEN', red: 'RED', yellow: 'YELLOW' };
         MIDI.setPadColor(midiNote, colorMap[color] || 'OFF');
-    },
-
-    saveConfig() {
-        App.updateConfig('pads', {
-            padConfigs: this.padConfigs,
-            sequencerEnabled: this.sequencerEnabled
-        });
-    },
-
-    loadConfig(config) {
-        if (config.pads?.padConfigs) {
-            this.padConfigs = { ...this.padConfigs, ...config.pads.padConfigs };
-        }
-        if (config.pads?.sequencerEnabled !== undefined) {
-            this.sequencerEnabled = config.pads.sequencerEnabled;
-        }
-        
-        this.updatePadVisuals();
-        
-        // Mettre à jour l'interface séquenceur si elle existe
-        if (this.currentMode === 'groups') {
-            this.updateSequencerOption();
-        }
     },
 
     syncToMIDI() {
@@ -383,6 +370,29 @@ const Pads = {
                 pad.style.transform = 'scale(0.95)';
                 setTimeout(() => pad.style.transform = '', 100);
             }
+        }
+    },
+
+    // ===== CONFIGURATION =====
+    saveConfig() {
+        App.updateConfig('pads', {
+            padConfigs: this.padConfigs,
+            sequencerEnabled: this.sequencerEnabled
+        });
+    },
+
+    loadConfig(config) {
+        if (config.pads?.padConfigs) {
+            this.padConfigs = { ...this.padConfigs, ...config.pads.padConfigs };
+        }
+        if (config.pads?.sequencerEnabled !== undefined) {
+            this.sequencerEnabled = config.pads.sequencerEnabled;
+        }
+        
+        this.updatePadVisuals();
+        
+        if (this.currentMode === 'groups') {
+            this.updateSequencerOption();
         }
     },
 

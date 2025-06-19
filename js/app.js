@@ -6,23 +6,45 @@ const App = {
         midiConnected: false,
         config: {
             pads: {},
-            buttons: {
-                82: { normal: 'play_stop', shift: 'stop' },
-                83: { normal: 'record', shift: 'stop' },
-                84: { normal: 'metronome_on', shift: 'metronome_off' },
-                85: { normal: 'new_clip_8bars', shift: 'quantize_clip' },
-                86: { normal: 'play_clip', shift: 'stop_clip' },
-                87: { normal: 'loop_auto', shift: 'overdub_loop' },
-                88: { normal: 'tempo_up_20', shift: 'tempo_down_20' },
-                89: { normal: 'launch_scene_1', shift: 'stop_all' }
-            },
             sequencer: {
-                scale: 'C_Major',
-                octave: 3,
+                activeGroup: null,
+                selectedScale: 'major',
+                octaveBase: 0,
+                selectedSwing: 50,
+                currentMode: 'steps',
                 steps: Array(16).fill(false),
-                playhead: 0,
                 isPlaying: false
             }
+        }
+    },
+
+    // ===== GESTION ÉTAT SÉQUENCEUR CENTRALISÉE =====
+    updateSequencerState(updates) {
+        this.state.config.sequencer = { 
+            ...this.state.config.sequencer, 
+            ...updates 
+        };
+        this.saveConfig();
+        this.broadcastConfigChange();
+    },
+    
+    getSequencerState() {
+        return this.state.config.sequencer;
+    },
+    
+    activateSequencerGroup(groupId) {
+        this.updateSequencerState({ activeGroup: groupId });
+        
+        if (this.state.currentView === 'sequencer' && typeof Sequencer !== 'undefined') {
+            Sequencer.setActiveGroup(groupId);
+        }
+    },
+    
+    deactivateSequencer() {
+        this.updateSequencerState({ activeGroup: null });
+        
+        if (typeof Sequencer !== 'undefined') {
+            Sequencer.setActiveGroup(null);
         }
     },
 
@@ -49,6 +71,9 @@ const App = {
     switchView(viewId) {
         if (this.state.currentView === viewId) return;
         
+        // Nettoyer la vue précédente
+        this.cleanupCurrentView();
+        
         this.state.currentView = viewId;
         
         // Mettre à jour boutons navigation
@@ -71,6 +96,50 @@ const App = {
         
         // Initialiser module si nécessaire
         this.initViewModule(viewId);
+        
+        // Mettre à jour le config panel dynamiquement
+        this.updateConfigPanel(viewId);
+    },
+
+    // ===== GESTION CONFIG PANEL DYNAMIQUE =====
+    updateConfigPanel(viewId) {
+        this.toggleModeSelector(viewId === 'pads');
+        
+        switch(viewId) {
+            case 'pads':
+                if (typeof Pads !== 'undefined' && Pads.showCurrentInterface) {
+                    Pads.showCurrentInterface();
+                }
+                break;
+            case 'sequencer':
+                if (typeof Sequencer !== 'undefined' && Sequencer.showConfigInterface) {
+                    Sequencer.showConfigInterface();
+                }
+                break;
+            case 'export':
+                if (typeof Export !== 'undefined' && Export.showConfigInterface) {
+                    Export.showConfigInterface();
+                }
+                break;
+        }
+    },
+    
+    cleanupCurrentView() {
+        // Nettoyer la vue précédente si nécessaire
+        switch(this.state.currentView) {
+            case 'sequencer':
+                if (typeof Sequencer !== 'undefined' && Sequencer.cleanup) {
+                    Sequencer.cleanup();
+                }
+                break;
+        }
+    },
+    
+    toggleModeSelector(show) {
+        const modeSelector = document.querySelector('.config-mode-selector');
+        if (modeSelector) {
+            modeSelector.style.display = show ? 'flex' : 'none';
+        }
     },
 
     initViewModule(viewId) {
@@ -80,14 +149,12 @@ const App = {
                     Pads.init();
                 }
                 break;
-            case 'buttons':
-                if (typeof Buttons !== 'undefined' && !Buttons.isInitialized) {
-                    Buttons.init();
-                }
-                break;
             case 'sequencer':
                 if (typeof Sequencer !== 'undefined' && !Sequencer.isInitialized) {
                     Sequencer.init();
+                } else if (typeof Sequencer !== 'undefined' && Sequencer.isInitialized) {
+                    // Réactiver le séquenceur si déjà initialisé
+                    Sequencer.activate();
                 }
                 break;
             case 'export':
@@ -140,20 +207,13 @@ const App = {
     },
 
     setupMIDIListeners() {
-        // Écouter les messages MIDI pour tous les modules
         window.addEventListener('midi-message', (event) => {
             const { status, note, velocity } = event.detail;
             
-            // Distribuer aux modules selon la vue active
             switch(this.state.currentView) {
                 case 'pads':
                     if (typeof Pads !== 'undefined' && Pads.handleMIDIPreview) {
                         Pads.handleMIDIPreview(event.detail);
-                    }
-                    break;
-                case 'buttons':
-                    if (typeof Buttons !== 'undefined' && Buttons.handleMIDIPreview) {
-                        Buttons.handleMIDIPreview(event.detail);
                     }
                     break;
                 case 'sequencer':
@@ -162,6 +222,14 @@ const App = {
                     }
                     break;
             }
+        });
+        
+        window.addEventListener('sequencer-group-activated', (event) => {
+            this.activateSequencerGroup(event.detail.groupId);
+        });
+        
+        window.addEventListener('sequencer-deactivated', () => {
+            this.deactivateSequencer();
         });
     },
 
@@ -196,12 +264,11 @@ const App = {
         }
     },
 
-    // ===== INITIALISATION MODULES ===== 
+    // ===== INITIALISATION MODULES =====
     initModules() {
         const modules = [
             { name: 'MIDI', obj: window.MIDI },
             { name: 'Pads', obj: window.Pads },
-            { name: 'Buttons', obj: window.Buttons },
             { name: 'Sequencer', obj: window.Sequencer },
             { name: 'Export', obj: window.Export }
         ];
@@ -209,8 +276,7 @@ const App = {
         modules.forEach(({ name, obj }) => {
             if (obj && typeof obj.init === 'function') {
                 try {
-                    // Ne pas initialiser automatiquement les modules de vue
-                    if (!['Pads', 'Buttons', 'Sequencer', 'Export'].includes(name)) {
+                    if (!['Pads', 'Sequencer', 'Export'].includes(name)) {
                         obj.init();
                     }
                 } catch (error) {
@@ -219,8 +285,8 @@ const App = {
             }
         });
         
-        // Initialiser le module de la vue actuelle
         this.initViewModule(this.state.currentView);
+        this.updateConfigPanel(this.state.currentView);
     },
 
     // ===== LOGGING ===== 
@@ -319,6 +385,21 @@ const App = {
     getCurrentView() {
         return this.state.currentView;
     },
+    
+    // ===== UTILITAIRES CONFIG PANEL =====
+    clearConfigPanel() {
+        const configPanel = document.getElementById('configContent');
+        if (configPanel) {
+            configPanel.innerHTML = '<div class="placeholder-text">Sélectionnez un élément pour le configurer</div>';
+        }
+    },
+    
+    setConfigPanelContent(content) {
+        const configPanel = document.getElementById('configContent');
+        if (configPanel) {
+            configPanel.innerHTML = content;
+        }
+    },
 
     // ===== CLEANUP ===== 
     destroy() {
@@ -336,13 +417,11 @@ window.addEventListener('beforeunload', () => {
 });
 
 document.addEventListener('keydown', (event) => {
-    // Ctrl+S : Sauvegarder
     if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
         App.saveConfig();
     }
     
-    // Échap : Désélectionner selon la vue
     if (event.key === 'Escape') {
         const currentView = App.getCurrentView();
         
@@ -352,17 +431,16 @@ document.addEventListener('keydown', (event) => {
                     Pads.deselectAll();
                 }
                 break;
-            case 'buttons':
-                if (typeof Buttons !== 'undefined' && Buttons.deselectAll) {
-                    Buttons.deselectAll();
+            case 'sequencer':
+                if (typeof Sequencer !== 'undefined' && Sequencer.deselectAll) {
+                    Sequencer.deselectAll();
                 }
                 break;
         }
     }
     
-    // Touches 1-4 : Changer de vue
-    if (event.key >= '1' && event.key <= '4' && !event.ctrlKey && !event.altKey) {
-        const views = ['pads', 'buttons', 'sequencer', 'export'];
+    if (event.key >= '1' && event.key <= '3' && !event.ctrlKey && !event.altKey) {
+        const views = ['pads', 'sequencer', 'export'];
         const viewIndex = parseInt(event.key) - 1;
         if (views[viewIndex]) {
             App.switchView(views[viewIndex]);

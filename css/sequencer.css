@@ -1,124 +1,87 @@
-/* ===== SEQUENCEUR CSS ===== */
+/* ===== SEQUENCER.CSS ===== */
 
-/* Layout principal 2 colonnes */
-.sequencer-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 20px;
-    height: 100%;
-    padding: 16px;
-}
-
-/* ===== COLONNE GAUCHE : CONTRÔLES ===== */
-.sequencer-controls {
+/* GRILLE SEQUENCEUR (GAUCHE) */
+.sequencer-grid-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+    padding: 20px;
 }
 
-/* Grille 4x4 */
 .sequencer-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #555;
-    border-radius: 8px;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+    width: 320px;
+    height: 320px;
 }
 
-/* Pads de la grille */
 .sequencer-pad {
-    width: 100%;
-    height: 60px;
     background: #2a2a2a;
-    border: 2px solid #444;
-    border-radius: 6px;
+    border: 2px solid #404040;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
+    user-select: none;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .sequencer-pad:hover {
-    border-color: #666;
-    transform: translateY(-1px);
+    border-color: #606060;
+    transform: scale(1.02);
 }
 
-.pad-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #ffffff;
-    text-align: center;
+.sequencer-pad:active {
+    transform: scale(0.98);
 }
 
-/* ===== TYPES DE PADS ===== */
-
-/* Step Pads (Mode Steps) */
-.step-pad {
-    background: #2a2a2a;
+/* COULEURS PADS SELON DESIGN */
+.sequencer-pad.color-green {
+    background: #4a6a4a;
+    border-color: #5a7a5a;
+    color: #e0e0e0;
 }
 
-.step-pad.programmed {
-    background: #F44336;
-    border-color: #F44336;
+.sequencer-pad.color-red {
+    background: #6a4a4a;
+    border-color: #7a5555;
+    color: #e0e0e0;
 }
 
-.step-pad.programmed .pad-label {
-    color: white;
+.sequencer-pad.color-yellow {
+    background: #6a6a4a;
+    border-color: #7a7a55;
+    color: #e0e0e0;
 }
 
-/* Scale Pads (Vert quand actif) */
-.scale-pad.active {
-    background: #4CAF50;
-    border-color: #4CAF50;
+/* ÉTATS ACTIFS */
+.sequencer-pad.active {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    border-color: #888;
 }
 
-.scale-pad.active .pad-label {
-    color: white;
+.sequencer-pad.programmed {
+    background: #6a4a4a;
+    border-color: #7a5555;
+    color: #fff;
 }
 
-/* Swing Pads (Jaune quand actif) */
-.swing-pad.active {
-    background: #FFC107;
-    border-color: #FFC107;
-}
-
-.swing-pad.active .pad-label {
-    color: #333;
-}
-
-/* Control Pads */
-.control-pad {
-    background: #3a3a3a;
-}
-
-.control-pad.active {
-    background: #5aa3d0;
-    border-color: #5aa3d0;
-}
-
-.control-pad.active .pad-label {
-    color: white;
-}
-
-/* ===== SECTION SWING ===== */
+/* SECTION SWING */
 .swing-section {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .swing-title {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    color: #999;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #ccc;
 }
 
 .swing-buttons {
@@ -127,16 +90,14 @@
 }
 
 .swing-btn {
-    flex: 1;
-    padding: 8px 12px;
     background: #3a3a3a;
-    border: 2px solid #555;
-    border-radius: 6px;
-    color: #e0e0e0;
-    font-size: 11px;
-    font-weight: 600;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #ccc;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 12px;
 }
 
 .swing-btn:hover {
@@ -145,181 +106,168 @@
 }
 
 .swing-btn.active {
-    background: #FFC107;
-    border-color: #FFC107;
-    color: #333;
+    background: #6a6a4a;
+    border-color: #7a7a55;
+    color: #fff;
 }
 
-/* ===== COLONNE DROITE : FEEDBACK ===== */
-.sequencer-feedback {
+/* PANEL SEQUENCEUR (DROITE) */
+.sequencer-panel {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-}
-
-/* Panel principal */
-.feedback-panel {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #555;
+    gap: 20px;
+    padding: 15px;
+    background: #2a2a2a;
     border-radius: 8px;
-    padding: 16px;
+    border: 1px solid #404040;
 }
 
-.feedback-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #5aa3d0;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-.feedback-separator {
-    height: 1px;
-    background: #555;
-    margin: 12px 0;
-}
-
-.feedback-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    font-size: 12px;
-    color: #e0e0e0;
-}
-
-.feedback-value {
-    padding: 4px 8px;
-    background: #3a3a3a;
-    border: 1px solid #555;
-    border-radius: 4px;
-    min-width: 60px;
-    text-align: center;
-    font-weight: 600;
-}
-
-/* Contrôles octave */
-.octave-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.octave-btn {
-    width: 24px;
-    height: 24px;
-    background: #3a3a3a;
-    border: 1px solid #555;
-    border-radius: 4px;
-    color: #e0e0e0;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.octave-btn:hover {
-    background: #4a4a4a;
-    border-color: #666;
-}
-
-.octave-value {
-    padding: 4px 8px;
-    background: #3a3a3a;
-    border: 1px solid #555;
-    border-radius: 4px;
-    min-width: 40px;
-    text-align: center;
-    font-weight: 600;
-    color: #e0e0e0;
-}
-
-/* Panel status */
-.status-panel {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 16px;
-}
-
-.status-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #999;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-info {
+/* GROUPE INFO */
+.sequencer-group-info {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.status-info > div {
-    font-size: 11px;
+.group-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.group-separator {
+    height: 1px;
+    background: #404040;
+}
+
+/* SCALE SECTION */
+.sequencer-scale-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.scale-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.scale-label {
+    font-size: 14px;
     color: #ccc;
+    min-width: 60px;
+}
+
+.scale-value {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: #fff;
+    font-size: 14px;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* OCTAVE SECTION */
+.sequencer-octave-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.octave-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.octave-label {
+    font-size: 14px;
+    color: #ccc;
+    min-width: 60px;
+}
+
+.octave-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.octave-btn {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.octave-btn:hover {
+    background: #4a4a4a;
+    border-color: #666;
+    color: #fff;
+}
+
+.octave-btn:active {
+    transform: scale(0.95);
+}
+
+.octave-value {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: #fff;
+    font-size: 14px;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* STATUS SECTION */
+.sequencer-status-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #404040;
+}
+
+.status-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #aaa;
 }
 
-.status-info span {
-    color: #5aa3d0;
-    font-weight: 600;
+.status-value {
+    color: #fff;
+    font-weight: 500;
 }
 
-/* ===== ANIMATIONS ===== */
-.sequencer-pad.programmed {
-    animation: pulse-red 0.3s ease;
-}
-
-@keyframes pulse-red {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.sequencer-pad.active {
-    box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-    .sequencer-layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-    }
-    
-    .sequencer-feedback {
-        order: -1;
-    }
-}
-
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .sequencer-grid {
-        gap: 2px;
-        padding: 12px;
+        width: 280px;
+        height: 280px;
+        gap: 6px;
     }
     
     .sequencer-pad {
-        height: 50px;
-    }
-    
-    .pad-label {
         font-size: 10px;
     }
     
-    .swing-buttons {
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .feedback-panel,
-    .status-panel {
+    .sequencer-panel {
         padding: 12px;
+        gap: 15px;
     }
 }
